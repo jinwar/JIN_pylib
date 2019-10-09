@@ -1,4 +1,6 @@
 import pickle
+import copy
+
 class BasicClass:
 
 	def save(self,filename):
@@ -11,4 +13,7 @@ class BasicClass:
 		with open(filename,'rb') as f:
 			temp = pickle.load(f)
 		self.__dict__.update(temp.__dict__)
+
+	def copy(self):
+		return copy.deepcopy(self)
 
