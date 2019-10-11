@@ -84,7 +84,7 @@ class Data2D(BasicClass):
             ,extent=extent)
         if use_timestamp:
             plt.gca().xaxis_date()
-            date_format = mdates.DateFormatter('%m/%d %H:%M')
+            date_format = mdates.DateFormatter('%m/%d %H:%M:%S')
             plt.gca().xaxis.set_major_formatter(date_format)
             plt.xticks(rotation=45)
     
