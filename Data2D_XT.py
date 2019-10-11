@@ -5,6 +5,7 @@ from .BasicClass import BasicClass
 from datetime import datetime,timedelta
 from scipy.signal import medfilt2d
 import matplotlib.dates as mdates
+from dateutil.parser import parse
 
 class Data2D(BasicClass):
 
@@ -110,4 +111,15 @@ class Data2D(BasicClass):
     
     def get_value_by_depth(self,depth):
         ind = np.argmin(np.abs(self.mds-depth))
-        return self.data[ind,:]
+        md = self.mds[ind]
+        return md,self.data[ind,:]
+
+    def get_value_by_timestr(self,timestr,fmt=None):
+        if fmt is None:
+            t = parse(timestr)
+        else:
+            t = datetime.strptime(timestr,fmt)
+        dt = (t-self.start_time).total_seconds()
+        ind = np.argmin(np.abs(self.taxis-dt))
+        output_time = self.start_time + timedelta(seconds=self.taxis[ind])
+        return output_time,self.data[:,ind]
