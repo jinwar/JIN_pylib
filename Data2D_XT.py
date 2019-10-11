@@ -77,14 +77,14 @@ class Data2D(BasicClass):
         return extent
 
     def plot_waterfall(self,ischan = False, cmap=plt.get_cmap('bwr')
-            , timescale='second',use_timestamp=False):
+            , timescale='second',use_timestamp=False,timefmt = '%m/%d %H:%M:%S'):
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
         plt.imshow(self.data,cmap = cmap, aspect='auto'
             ,extent=extent)
         if use_timestamp:
             plt.gca().xaxis_date()
-            date_format = mdates.DateFormatter('%m/%d %H:%M:%S')
+            date_format = mdates.DateFormatter(timefmt)
             plt.gca().xaxis.set_major_formatter(date_format)
             plt.xticks(rotation=45)
     
