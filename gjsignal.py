@@ -288,3 +288,10 @@ def fetch_timestamp_fast(timestamp_strs, downsampling=100):
 def multi_legend(lns,loc='best'):
     labs = [l.get_label() for l in lns]
     plt.legend(lns,labs,loc=loc)
+
+
+def datetime_interp(timex,timex0,y0):
+    x = [(t-timex0[0]).total_seconds() for t in timex]
+    x0 = [(t-timex0[0]).total_seconds() for t in timex0]
+    return np.interp(x,x0,y0)
+    
