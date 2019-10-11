@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import ipywidgets as widgets
 from IPython.display import display
+import matplotlib.dates as mdates
+from dateutil.parser import parse
 
 class CoPlot_Waterfall_Pumping:
 
@@ -48,6 +50,7 @@ class CoPlot_Waterfall_Pumping:
         axs[0] = plt.subplot2grid((5,1),(0,0),rowspan=3)
         self.Ddata.plot_waterfall(use_timestamp=True)
         plt.clim(cx*self.c_range.value+self.c_center.value)
+        plt.setp(axs[0].get_xticklabels(), visible=False)
         axs[1] = plt.subplot2grid((5,1),(3,0),rowspan=1,sharex = axs[0])
         self.Pdata.plot_multi_cols(use_timestamp=True)
         self.axs = axs
@@ -98,3 +101,18 @@ class Interactive_Waterfall:
         self.axs = axs
 
 
+def get_timeaxis_plot(row,timefmt='%m/%d %H:%M:%S'):
+    fig,axs = plt.subplots(row,1,sharex=True)
+    date_format = mdates.DateFormatter(timefmt)
+    for ax in axs:
+        date_format = mdates.DateFormatter(timefmt)
+        ax.xaxis.set_major_formatter(date_format)
+    for ax in axs[:-1]:
+        plt.setp(ax.get_xticklabels(), visible=False)
+    fig.autofmt_xdate()
+    return fig,axs
+
+def xlim_timestr(str1,str2):
+    bgt = parse(str1)
+    edt = parse(str2)
+    plt.xlim([bgt,edt])
