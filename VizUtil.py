@@ -103,8 +103,8 @@ class Interactive_Waterfall:
         self.axs = axs
 
 
-def get_timeaxis_plot(row,timefmt='%m/%d %H:%M:%S'):
-    fig,axs = plt.subplots(row,1,sharex=True)
+def get_timeaxis_plot(row,timefmt='%m/%d %H:%M:%S',figsize=(8,6)):
+    fig,axs = plt.subplots(row,1,sharex=True,figsize=figsize)
     date_format = mdates.DateFormatter(timefmt)
     for ax in axs:
         date_format = mdates.DateFormatter(timefmt)
