@@ -66,3 +66,4 @@ class PumpCurve(BasicClass):
             axs[0].xaxis.set_major_formatter(date_format)
             axs[0].tick_params(axis='x',labelrotation=45)
         axs[0].legend(lines, [l.get_label() for l in lines],loc='upper right',fontsize=5)
+        
