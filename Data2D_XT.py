@@ -1,4 +1,4 @@
-import gjsignal
+from . import gjsignal
 import numpy as np
 import matplotlib.pyplot as plt
 from .BasicClass import BasicClass
