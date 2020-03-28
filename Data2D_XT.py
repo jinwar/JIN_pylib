@@ -80,9 +80,13 @@ class Data2D(BasicClass):
             , timescale='second',use_timestamp=False,timefmt = '%m/%d %H:%M:%S'):
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
-        plt.imshow(self.data,cmap = cmap, aspect='auto'
-            ,extent=extent)
+        if ~use_timestamp:
+            plt.imshow(self.data,cmap = cmap, aspect='auto'
+                ,extent=extent)
         if use_timestamp:
+            plt.subplot2grid((5,1),(0,0),rowspan=4)
+            plt.imshow(self.data,cmap = cmap, aspect='auto'
+                ,extent=extent)
             plt.gca().xaxis_date()
             date_format = mdates.DateFormatter(timefmt)
             plt.gca().xaxis.set_major_formatter(date_format)
