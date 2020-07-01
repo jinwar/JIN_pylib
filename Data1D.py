@@ -67,3 +67,22 @@ class PumpCurve(BasicClass):
             axs[0].tick_params(axis='x',labelrotation=45)
         axs[0].legend(lines, [l.get_label() for l in lines],loc='upper right',fontsize=5)
         
+    def plot_col(self,col,timescale='second',use_timestamp=False,is_shrink=False):
+        ts = 1
+        if timescale == 'hour':
+            ts = 3600
+        if timescale == 'day':
+            ts = 3600/24
+        if is_shrink:
+            plt.subplot2grid((5,1),(0,0),rowspan=4)
+        if use_timestamp:
+            plt.plot(self.timestamps,self.df[col],label=col)
+        else:
+            plt.plot(self.taxis/ts,self.df[col],label=col)
+        ax = plt.gca()
+        if use_timestamp:
+            ax.xaxis_date()
+            date_format = mdates.DateFormatter('%m/%d %H:%M')
+            ax.xaxis.set_major_formatter(date_format)
+            ax.tick_params(axis='x',labelrotation=45)
+        
