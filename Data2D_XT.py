@@ -84,7 +84,6 @@ class Data2D(BasicClass):
             plt.imshow(self.data,cmap = cmap, aspect='auto'
                 ,extent=extent)
         if use_timestamp:
-            plt.subplot2grid((5,1),(0,0),rowspan=4)
             plt.imshow(self.data,cmap = cmap, aspect='auto'
                 ,extent=extent)
             plt.gca().xaxis_date()

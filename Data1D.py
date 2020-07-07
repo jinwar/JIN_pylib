@@ -36,7 +36,7 @@ class PumpCurve(BasicClass):
              for t in timestamps])
         self.timestamps = timestamps
     
-    def plot_multi_cols(self,timescale='second',use_timestamp=False):
+    def plot_multi_cols(self,timescale='second',use_timestamp=False,legend_loc='best'):
         ts = 1
         if timescale == 'hour':
             ts = 3600
@@ -65,7 +65,7 @@ class PumpCurve(BasicClass):
             date_format = mdates.DateFormatter('%m/%d %H:%M')
             axs[0].xaxis.set_major_formatter(date_format)
             axs[0].tick_params(axis='x',labelrotation=45)
-        axs[0].legend(lines, [l.get_label() for l in lines],loc='upper right',fontsize=5)
+        axs[0].legend(lines, [l.get_label() for l in lines],loc=legend_loc,fontsize=5)
         
     def plot_col(self,col,timescale='second',use_timestamp=False,is_shrink=False):
         ts = 1
