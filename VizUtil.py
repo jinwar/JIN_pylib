@@ -118,3 +118,7 @@ def xlim_timestr(str1,str2):
     bgt = parse(str1)
     edt = parse(str2)
     plt.xlim([bgt,edt])
+
+def multi_plot_legend(lns):
+    labs = [l.get_label() for l in lns]
+    plt.gca().legend(lns,labs)

@@ -295,3 +295,5 @@ def datetime_interp(timex,timex0,y0):
     x0 = [(t-timex0[0]).total_seconds() for t in timex0]
     return np.interp(x,x0,y0)
     
+def running_average(data,N):
+    return np.convolve(data,np.ones((N,))/N,mode='same')
