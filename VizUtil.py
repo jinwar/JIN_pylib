@@ -119,6 +119,6 @@ def xlim_timestr(str1,str2):
     edt = parse(str2)
     plt.xlim([bgt,edt])
 
-def multi_plot_legend(lns):
+def multi_plot_legend(lns,loc='best'):
     labs = [l.get_label() for l in lns]
-    plt.gca().legend(lns,labs)
+    plt.gca().legend(lns,labs,loc=loc)
