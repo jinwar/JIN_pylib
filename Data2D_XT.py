@@ -1,5 +1,6 @@
 from . import gjsignal
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from .BasicClass import BasicClass
 from datetime import datetime,timedelta
@@ -126,3 +127,24 @@ class Data2D(BasicClass):
         ind = np.argmin(np.abs(self.taxis-dt))
         output_time = self.start_time + timedelta(seconds=self.taxis[ind])
         return output_time,self.data[:,ind]
+
+def read_NB_csv(filename):
+    df = pd.read_csv(filename)
+
+    timestrs = list(df.columns[1:])
+
+    timestamps = [datetime.strptime(t,'%m/%d/%Y %H:%M:%S.%f') for t in timestrs]
+    timestamps = np.array(timestamps)
+    mds = df['Length'].values
+    data = df.iloc[:,1:].values
+
+    chans = np.arange(data.shape[0])
+
+    Ddata = Data2D()
+    Ddata.set_data(data)
+    Ddata.set_mds(mds)
+    Ddata.set_chans(chans)
+    Ddata.set_time_from_datetime(timestamps)
+    Ddata.timestamps = timestamps
+    
+    return Ddata
