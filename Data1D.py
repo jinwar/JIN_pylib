@@ -9,7 +9,7 @@ class PumpCurve(BasicClass):
 
     def __init__(self):
         self.version = '1.0'
-        self.time = []
+        self.taxis = []
         self.df = []
         self.plot_cols = []
     
