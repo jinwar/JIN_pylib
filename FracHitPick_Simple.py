@@ -13,6 +13,7 @@ class PickFrac():
         except:
             self.pickdf = pd.DataFrame(columns=['time','md'])
         self.lines = []
+        self.cx = np.array([-1,1])
     
     def draw(self):
         plt.draw()
@@ -26,12 +27,13 @@ class PickFrac():
         except:
             pass
         lines = []
-        edtime = self.Ddata.get_extent(use_timestamp=True)[1]
+        edtime = plt.gca().axis()[1]
         for i,row in self.pickdf.iterrows():
             bgtime = pd.to_datetime(row['time'])
             bgtime = mdates.date2num(bgtime)
-            lines.append(self.viz.axs[0].plot([bgtime,edtime],[row['md'],row['md']],'k--'))
+            lines.append(plt.gca().plot([bgtime,edtime],[row['md'],row['md']],'k--'))
         self.lines = lines
+        plt.draw()
 
     
     def event_handle(self,event):
@@ -49,3 +51,15 @@ class PickFrac():
                 self.pickdf.reset_index(drop=True,inplace=True)
             self.update_lines()
 
+        if event.key == '=':
+            self.cx = self.cx/1.2
+            plt.clim(self.cx)
+            plt.draw()
+
+        if event.key == '-':
+            self.cx = self.cx*1.2
+            plt.clim(self.cx)
+            plt.draw()
+            
+    def save(self):
+        self.pickdf.to_csv(self.pickfile,index=False)
