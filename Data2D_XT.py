@@ -14,7 +14,9 @@ class Data2D(BasicClass):
         self.version = '1.0'
         self.data = []
         self.chans = []
+        self.mds = []
         self.taxis = []
+        self.start_time = None
 
     def set_data(self,data):
         self.data = data
@@ -127,6 +129,46 @@ class Data2D(BasicClass):
         ind = np.argmin(np.abs(self.taxis-dt))
         output_time = self.start_time + timedelta(seconds=self.taxis[ind])
         return output_time,self.data[:,ind]
+    
+    def saveh5(self,filename):
+        f = h5py.File(filename,'w')
+        # save main dataset
+        dset = f.create_dataset('data',data=self.data)
+        # save all the attributes to the main dataset
+        dset.attrs['start time'] = self.start_time.strftime('%Y%m%d_%H%M%S.%f')
+        for k in self.attrs.keys():
+            dset.attrs[k] = self.attrs[k]
+        # save all other ndarray and lists in the class
+        for k in self.__dict__.keys():
+            if k == 'data':
+                continue
+            if k == 'start_time':
+                continue
+            if k == 'attrs':
+                continue
+            dtype = type(self.__dict__[k])
+            if dtype == np.ndarray:
+                f.create_dataset(k,data=self.__dict__[k])
+            if dtype == list:
+                f.create_dataset(k,data=self.__dict__[k])
+
+        f.close()
+
+
+    def loadh5(self,filename):
+        f = h5py.File(filename,'r')
+        # read start_time
+        self.start_time = datetime.strptime(f['data'].attrs['start time'],'%Y%m%d_%H%M%S.%f')
+        # read attributes
+        self.attrs = {}
+        for k in f['data'].attrs.keys():
+            if k == 'start time':
+                continue
+            self.attrs[k] = f['data'].attrs[k]
+        # read all other ndarrays
+        for k in f.keys():
+            setattr(self,k,np.array(f[k]))
+        f.close()
 
 def read_NB_csv(filename):
     df = pd.read_csv(filename)
