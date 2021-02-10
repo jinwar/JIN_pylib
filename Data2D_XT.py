@@ -10,12 +10,12 @@ from dateutil.parser import parse
 class Data2D():
 
     def __init__(self):
-        self.version = '1.0'
-        self.data = []
-        self.chans = []
-        self.mds = []
-        self.taxis = []
-        self.start_time = None
+        self.data = None   # data, 2D array
+        self.start_time = None  # starting time using datetime
+        self.taxis = []  # time axis in second from start_time
+        self.chan = [] # fiber channel number
+        self.md = []  # fiber physical distance or location
+        self.attrs = {'Python Class Version':'1.1'} # data attributes
 
     def set_data(self,data):
         self.data = data
