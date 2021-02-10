@@ -2,13 +2,12 @@ from . import gjsignal
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from .BasicClass import BasicClass
 from datetime import datetime,timedelta
 from scipy.signal import medfilt2d
 import matplotlib.dates as mdates
 from dateutil.parser import parse
 
-class Data2D(BasicClass):
+class Data2D():
 
     def __init__(self):
         self.version = '1.0'
