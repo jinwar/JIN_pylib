@@ -13,8 +13,8 @@ class Data2D():
         self.data = None   # data, 2D array
         self.start_time = None  # starting time using datetime
         self.taxis = []  # time axis in second from start_time
-        self.chan = [] # fiber channel number
-        self.md = []  # fiber physical distance or location
+        self.chans = [] # fiber channel number
+        self.mds = []  # fiber physical distance or location
         self.attrs = {'Python Class Version':'1.1'} # data attributes
 
     def set_data(self,data):
