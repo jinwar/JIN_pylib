@@ -6,6 +6,7 @@ from datetime import datetime,timedelta
 from scipy.signal import medfilt2d
 import matplotlib.dates as mdates
 from dateutil.parser import parse
+import h5py
 
 class Data2D():
 
