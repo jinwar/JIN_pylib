@@ -131,28 +131,32 @@ class Data2D():
         return output_time,self.data[:,ind]
     
     def saveh5(self,filename):
-        f = h5py.File(filename,'w')
-        # save main dataset
-        dset = f.create_dataset('data',data=self.data)
-        # save all the attributes to the main dataset
-        dset.attrs['start time'] = self.start_time.strftime('%Y%m%d_%H%M%S.%f')
-        for k in self.attrs.keys():
-            dset.attrs[k] = self.attrs[k]
-        # save all other ndarray and lists in the class
-        for k in self.__dict__.keys():
-            if k == 'data':
-                continue
-            if k == 'start_time':
-                continue
-            if k == 'attrs':
-                continue
-            dtype = type(self.__dict__[k])
-            if dtype == np.ndarray:
-                f.create_dataset(k,data=self.__dict__[k])
-            if dtype == list:
-                f.create_dataset(k,data=self.__dict__[k])
+        with h5py.File(filename,'w') as f:
+            # save main dataset
+            dset = f.create_dataset('data',data=self.data)
+            # save all the attributes to the main dataset
+            dset.attrs['start time'] = self.start_time.strftime('%Y%m%d_%H%M%S.%f')
+            for k in self.attrs.keys():
+                dset.attrs[k] = self.attrs[k]
+            # save all other ndarray and lists in the class
+            for k in self.__dict__.keys():
+                if k == 'data':
+                    continue
+                if k == 'start_time':
+                    continue
+                if k == 'attrs':
+                    continue
+                try:
+                    f.create_dataset(k,data=self.__dict__[k])
+                except:
+                    print('cannot save variable: ',k)
+                # dtype = type(self.__dict__[k])
+                # if dtype == np.ndarray:
+                #     f.create_dataset(k,data=self.__dict__[k])
+                # if dtype == list:
+                #     f.create_dataset(k,data=self.__dict__[k])
 
-        f.close()
+        # f.close()
 
 
     def loadh5(self,filename):
