@@ -54,6 +54,12 @@ class Data2D():
             self.data[ichan,:] = gjsignal.lpfilter(self.data[ichan,:]
                 ,dt,corner_freq,order=order)
 
+    def bp_filter(self,lowf,highf,order=2):
+        dt = np.median(np.diff(self.taxis))
+        for ichan in range(self.data.shape[0]):
+            self.data[ichan,:] = gjsignal.bpfilter(self.data[ichan,:]
+                ,dt,lowf,highf,order=order)
+
     def take_diff(self):
         data = np.diff(self.data,axis=1)
         self.taxis = self.taxis[1:]
