@@ -86,13 +86,15 @@ class Data2D():
         return extent
 
     def plot_waterfall(self,ischan = False, cmap=plt.get_cmap('bwr')
-            , timescale='second',use_timestamp=False,timefmt = '%m/%d %H:%M:%S'):
+            , timescale='second',use_timestamp=False,timefmt = '%m/%d %H:%M:%S', is_shorten=False):
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
         if ~use_timestamp:
             plt.imshow(self.data,cmap = cmap, aspect='auto'
                 ,extent=extent)
         if use_timestamp:
+            if is_shorten:
+                plt.subplot2grid((5,1),(0,0),rowspan=4)
             plt.imshow(self.data,cmap = cmap, aspect='auto'
                 ,extent=extent)
             plt.gca().xaxis_date()
