@@ -61,7 +61,9 @@ class Treble_io():
         filedf['filename'] = files
         timestamps = []
         for f in files:
-            t = datetime.strptime(f[-43:-21],'%Y%m%d-HMS%H%M%S.%f')\
+            bgc = f.find('YMD',-50)+3
+            edc = f.find('_seq',-50)
+            t = datetime.strptime(f[bgc:edc],'%Y%m%d-HMS%H%M%S.%f')\
                     .replace(tzinfo=pytz.utc).astimezone(self.timezone) 
             timestamps.append(t)
         filedf['time'] = timestamps
