@@ -3,8 +3,8 @@ from . import Data2D_XT
 from datetime import datetime
 import h5py
 import pytz
-
-
+import shutil
+import os
 
 #Define the class to read Treble data from individual file
 class read_Treble():
@@ -42,3 +42,73 @@ class read_Treble():
             DASdata.attrs['Gauge Length'] = self.gauge_length_chanN*dx
             DASdata.attrs['dx'] = dx
         return DASdata
+
+
+class Treble_io():
+
+    def __init__(self,datapath,timezone):
+        self.datapath = datapath
+        self.timezone = timezone # timezone in pytz
+        self.build_database()
+
+    def build_database(self):
+        files = glob(self.datapath+'/*/*.hdf5')
+        filedf = pd.DataFrame()
+        filedf['filename'] = files
+        bgc = files[0].find('YMD')+3
+        edc = files[0].find('_seq')
+        print(files[0][bgc:edc])
+        timestamps = []
+        for f in files:
+            bgc = f.find('YMD')+3
+            edc = f.find('_seq')
+            t = datetime.strptime(f[bgc:edc],'%Y%m%d-HMS%H%M%S.%f')\
+                    .replace(tzinfo=pytz.utc).astimezone(self.timezone) 
+            timestamps.append(t)
+        filedf['time'] = timestamps
+        self.filedf = filedf.sort_values(by='time')
+
+    # define function to file[s] that contains the data
+    def get_filename(self,bgtime,edtime):
+        filedf = self.filedf
+        ind = filedf['time'] < bgtime
+        bgfileid = np.where(ind)[0][-1]
+        ind = filedf['time'] < edtime
+        edfileid = np.where(ind)[0][-1]
+        if bgfileid == edfileid:
+            filename = [filedf['filename'].iloc[bgfileid]]
+        else:
+            filename = [filedf['filename'].iloc[bgfileid],filedf['filename'].iloc[edfileid]]
+        return filename
+    
+    def get_data_bydatetime(self,bgtime,edtime):
+        files = self.get_filename(bgtime,edtime)
+        if len(files)==1:
+            rt = TrebleReader.read_Treble(files[0])
+            DASdata = rt.get_data(bgtime,edtime,self.timezone)
+        if len(files)==2:
+            rt = TrebleReader.read_Treble(files[0])
+            DASdata = rt.get_data(bgtime,edtime,self.timezone)
+            rt = TrebleReader.read_Treble(files[1])
+            DASdata1 = rt.get_data(bgtime,edtime,self.timezone)
+            DASdata.right_merge(DASdata1)
+        return DASdata
+
+
+class Treble_io_colab(Treble_io):
+
+    def __init__(self,datapath,timezone):
+        super().__init__(datapath, timezone)
+        if not os.path.isdir('./temp'):
+            os.mkdir('./temp')
+
+    def get_filename(self,bgtime,edtime):
+        files = super().get_filename(bgtime,edtime)
+        local_files = []
+        for f in files:
+            local_file = './temp/'+os.path.basename(f)
+            if not os.path.isfile(local_file):
+                print('copying '+os.path.basename(f)+' to local')
+                shutil.copy(f,local_file)
+            local_files.append(local_file)
+        return local_files
