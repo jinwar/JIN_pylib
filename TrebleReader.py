@@ -6,6 +6,7 @@ import pytz
 import shutil
 import os
 from glob import glob
+import pandas as pd
 
 #Define the class to read Treble data from individual file
 class read_Treble():
