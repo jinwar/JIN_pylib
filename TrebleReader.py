@@ -86,12 +86,12 @@ class Treble_io():
     def get_data_bydatetime(self,bgtime,edtime):
         files = self.get_filename(bgtime,edtime)
         if len(files)==1:
-            rt = TrebleReader.read_Treble(files[0])
+            rt = read_Treble(files[0])
             DASdata = rt.get_data(bgtime,edtime,self.timezone)
         if len(files)==2:
-            rt = TrebleReader.read_Treble(files[0])
+            rt = read_Treble(files[0])
             DASdata = rt.get_data(bgtime,edtime,self.timezone)
-            rt = TrebleReader.read_Treble(files[1])
+            rt = read_Treble(files[1])
             DASdata1 = rt.get_data(bgtime,edtime,self.timezone)
             DASdata.right_merge(DASdata1)
         return DASdata
