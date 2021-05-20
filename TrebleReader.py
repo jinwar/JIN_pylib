@@ -43,6 +43,8 @@ class read_Treble():
             DASdata.mds = DASdata.chans*dx
             DASdata.attrs['Gauge Length'] = self.gauge_length_chanN*dx
             DASdata.attrs['dx'] = dx
+            dt = np.median(np.diff(DASdata.taxis))
+            DASdata.attrs['dt'] = dt
         return DASdata
 
 
