@@ -102,6 +102,7 @@ class Treble_io():
         """
         bgtime = datetime.strptime(bgtimestr,'%Y/%m/%d %H:%M:%S.%f').replace(tzinfo=self.timezone)
         edtime = datetime.strptime(edtimestr,'%Y/%m/%d %H:%M:%S.%f').replace(tzinfo=self.timezone)
+        return self.get_data_bydatetime(bgtime,edtime)
 
 
 class Treble_io_colab(Treble_io):
