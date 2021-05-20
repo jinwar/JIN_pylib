@@ -158,13 +158,6 @@ class Data2D():
                     f.create_dataset(k,data=self.__dict__[k])
                 except:
                     print('cannot save variable: ',k)
-                # dtype = type(self.__dict__[k])
-                # if dtype == np.ndarray:
-                #     f.create_dataset(k,data=self.__dict__[k])
-                # if dtype == list:
-                #     f.create_dataset(k,data=self.__dict__[k])
-
-        # f.close()
 
 
     def loadh5(self,filename):
@@ -181,24 +174,8 @@ class Data2D():
         for k in f.keys():
             setattr(self,k,np.array(f[k]))
         f.close()
-
-def read_NB_csv(filename):
-    df = pd.read_csv(filename)
-
-    timestrs = list(df.columns[1:])
-
-    timestamps = [datetime.strptime(t,'%m/%d/%Y %H:%M:%S.%f') for t in timestrs]
-    timestamps = np.array(timestamps)
-    mds = df['Length'].values
-    data = df.iloc[:,1:].values
-
-    chans = np.arange(data.shape[0])
-
-    Ddata = Data2D()
-    Ddata.set_data(data)
-    Ddata.set_mds(mds)
-    Ddata.set_chans(chans)
-    Ddata.set_time_from_datetime(timestamps)
-    Ddata.timestamps = timestamps
     
-    return Ddata
+    def right_merge(self,data):
+        taxis = data.taxis + (data.start_time - self.start_time).total_seconds()
+        self.taxis = np.concatenate((self.taxis,taxis))
+        self.data = np.concatenate((self.data.T,data.data.T)).T
