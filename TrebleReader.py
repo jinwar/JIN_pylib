@@ -5,6 +5,7 @@ import h5py
 import pytz
 import shutil
 import os
+from glob import glob
 
 #Define the class to read Treble data from individual file
 class read_Treble():
