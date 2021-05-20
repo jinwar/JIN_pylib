@@ -94,6 +94,14 @@ class Treble_io():
             DASdata1 = rt.get_data(bgtime,edtime,self.timezone)
             DASdata.right_merge(DASdata1)
         return DASdata
+    
+    def get_data_bytimestr(self,bgtimestr,edtimestr):
+        """
+        The input string has to follow format: '%Y/%m/%d %H:%M:%S.%f'
+        example: '2021/05/19 13:03:16.000'
+        """
+        bgtime = datetime.strptime(bgtimestr,'%Y/%m/%d %H:%M:%S.%f').replace(tzinfo=self.timezone)
+        edtime = datetime.strptime(edtimestr,'%Y/%m/%d %H:%M:%S.%f').replace(tzinfo=self.timezone)
 
 
 class Treble_io_colab(Treble_io):
