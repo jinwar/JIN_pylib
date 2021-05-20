@@ -37,8 +37,8 @@ class read_Treble():
                 DASdata.data = strain_data.T
             DASdata.start_time = timestamps[0]
             DASdata.taxis = np.array([dt.total_seconds() for dt in (timestamps-timestamps[0])])
-            DASdata.chan = np.arange(data.shape[1])
-            DASdata.md = DASdata.chan*dx
+            DASdata.chans = np.arange(data.shape[1])
+            DASdata.mds = DASdata.chans*dx
             DASdata.attrs['Gauge Length'] = self.gauge_length_chanN*dx
             DASdata.attrs['dx'] = dx
         return DASdata
