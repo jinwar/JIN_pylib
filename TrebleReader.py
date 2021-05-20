@@ -1,5 +1,5 @@
 import numpy as np
-import Data2D_XT
+from . import Data2D_XT
 from datetime import datetime
 import h5py
 
