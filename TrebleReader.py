@@ -59,14 +59,9 @@ class Treble_io():
         files = glob(self.datapath+'/*/*.hdf5')
         filedf = pd.DataFrame()
         filedf['filename'] = files
-        bgc = files[0].find('YMD')+3
-        edc = files[0].find('_seq')
-        print(files[0][bgc:edc])
         timestamps = []
         for f in files:
-            bgc = f.find('YMD')+3
-            edc = f.find('_seq')
-            t = datetime.strptime(f[bgc:edc],'%Y%m%d-HMS%H%M%S.%f')\
+            t = datetime.strptime(f[-43:-21],'%Y%m%d-HMS%H%M%S.%f')\
                     .replace(tzinfo=pytz.utc).astimezone(self.timezone) 
             timestamps.append(t)
         filedf['time'] = timestamps
