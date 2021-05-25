@@ -21,6 +21,7 @@ class read_Treble():
             timestamps = np.array([datetime.fromtimestamp(s,tz) # apply time zone
                                    for s in fp['deformation/gps_time'][:]])
             ind = (timestamps>bgtime)&(timestamps<edtime)
+            ind = np.where(ind)[0]
             data = fp['deformation/data'][ind,:]
             timestamps = timestamps[ind]
             dx = fp['deformation/data'].attrs['dx']
