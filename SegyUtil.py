@@ -11,8 +11,7 @@ def savesegy(DASdata,filename):
     stream = Stream()
     for i in range(DASdata.data.shape[0]):
         data = DASdata.data[i,:]
-        data = np.require(data, dtype=np.float32)
-        DASdt = DASdata.attrs['dt']
+        DASdt = np.median(np.diff(DASdata.taxis))
         if DASdt<0.001:
             dt = 0.001
             data = gjsignal.lpfilter(data,DASdt,500)
@@ -22,6 +21,7 @@ def savesegy(DASdata,filename):
         else:
             dt = DASdt
 
+        data = np.require(data, dtype=np.float32)
         trace = Trace(data=data)
 
         # Attributes in trace.stats will overwrite everything in
