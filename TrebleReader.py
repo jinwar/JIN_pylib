@@ -84,6 +84,8 @@ class Treble_io():
     
     def get_data_bydatetime(self,bgtime,edtime):
         files = self.get_filename(bgtime,edtime)
+        print('Getting data from file:', files)
+        print('time range:',bgtime, edtime)
         if len(files)==1:
             rt = read_Treble(files[0])
             DASdata = rt.get_data(bgtime,edtime,self.timezone)
@@ -100,8 +102,11 @@ class Treble_io():
         The input string has to follow format: '%Y/%m/%d %H:%M:%S.%f'
         example: '2021/05/19 13:03:16.000'
         """
-        bgtime = datetime.strptime(bgtimestr,'%Y/%m/%d %H:%M:%S.%f').replace(tzinfo=self.timezone)
-        edtime = datetime.strptime(edtimestr,'%Y/%m/%d %H:%M:%S.%f').replace(tzinfo=self.timezone)
+        # bgtime = datetime.strptime(bgtimestr,'%Y/%m/%d %H:%M:%S.%f').replace(tzinfo=self.timezone)
+        bgtime = datetime.strptime(bgtimestr,'%Y/%m/%d %H:%M:%S.%f')
+        bgtime = self.timezone.localize(bgtime)
+        edtime = datetime.strptime(edtimestr,'%Y/%m/%d %H:%M:%S.%f')
+        edtime = self.timezone.localize(edtime)
         return self.get_data_bydatetime(bgtime,edtime)
 
 
