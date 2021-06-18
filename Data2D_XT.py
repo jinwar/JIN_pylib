@@ -48,6 +48,32 @@ class Data2D():
     def median_filter(self,kernel_size=(5,3)):
         self.data = medfilt2d(self.data,kernel_size=kernel_size)
     
+    def window_data_time(self,bgtime, edtime,reset_startime=True):
+        ind = (self.taxis>bgtime)&(self.taxis<edtime)
+        self.data = self.data[:,ind]
+        self.taxis = self.taxis[ind]
+        t0 = self.taxis[0]
+        if reset_startime:
+            self.taxis = self.taxis-t0
+            self.start_time += timedelta(seconds=t0)
+    
+    def window_data_depth(self,bgmd,edmd,ismd=True):
+        if ismd:
+            ind = (self.mds>bgmd)&(self.mds<edmd)
+        else:
+            ind = (self.chans>bgmd)&(self.chans<edmd)
+        self.data = self.data[ind,:]
+        try:
+            self.mds = self.mds[ind]
+        except:
+            print('cannot find mds field')
+            pass
+        try:
+            self.chans = self.chans[ind]
+        except:
+            print('cannot find chans field')
+            pass
+    
     def lp_filter(self,corner_freq,order=2):
         dt = np.median(np.diff(self.taxis))
         for ichan in range(self.data.shape[0]):
