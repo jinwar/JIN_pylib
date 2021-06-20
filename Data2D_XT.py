@@ -17,6 +17,7 @@ class Data2D():
         self.chans = [] # fiber channel number
         self.mds = []  # fiber physical distance or location
         self.attrs = {'Python Class Version':'1.1'} # data attributes
+        self.history = []
 
     def set_data(self,data):
         self.data = data
