@@ -32,6 +32,7 @@ def Data2D_plotfk(DASdata):
 def Data2D_fkfilter_applymask(DASdata,mask):
     DASdata.fftdata *= mask
     DASdata.data = np.real(np.fft.ifft2(np.fft.ifftshift(DASdata.fftdata)))
+    DASdata.history.append('applied custom fk filter')
     return DASdata
 
 def Data2D_fkfilter_maskgen(DASdata,vmin,vmax,filter_std):
@@ -47,4 +48,8 @@ def Data2D_fkfilter_maskgen(DASdata,vmin,vmax,filter_std):
 def Data2D_fkfilter_velocity(DASdata,vmin,vmax,filter_std=0):
     mask = Data2D_fkfilter_maskgen(DASdata,vmin,vmax,filter_std)
     DASdata = Data2D_fkfilter_applymask(DASdata,mask)
+    DASdata.history.pop()
+    DASdata.history.append(
+        'applied velocity filter from {} to {}, with smoothing kernel: {}'
+        .format(vmin,vmax,filter_std))
     return DASdata
