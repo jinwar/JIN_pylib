@@ -37,8 +37,9 @@ def savesegy(DASdata,filename):
         if not hasattr(trace.stats, 'segy.trace_header'):
             trace.stats.segy = {}
         trace.stats.segy.trace_header = SEGYTraceHeader()
-        trace.stats.segy.trace_header.trace_sequence_number_within_line = i + 1
-        trace.stats.segy.trace_header.receiver_group_elevation = 444
+        trace.stats.segy.trace_header.trace_sequence_number_within_line = DASdata.chans[i]
+        trace.stats.segy.trace_header.x_coordinate_of_ensemble_position_of_this_trace = int(DASdata.mds[i]*1000) # in millimeter
+        trace.stats.segy.trace_header.lag_time_A = DASdata.start_time.microsecond
 
         # Add trace to stream
         stream.append(trace)
