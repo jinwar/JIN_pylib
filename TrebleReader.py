@@ -1,12 +1,13 @@
 import numpy as np
 from . import Data2D_XT
-from datetime import datetime
+from datetime import datetime,timedelta
 import h5py
 import pytz
 import shutil
 import os
 from glob import glob
 import pandas as pd
+from time import time
 
 #Define the class to read Treble data from individual file
 class read_Treble():
@@ -18,13 +19,20 @@ class read_Treble():
     
     def get_data(self,bgtime,edtime,tz):
         with h5py.File(self.filename,'r') as fp:
-            timestamps = np.array([datetime.fromtimestamp(s,tz) # apply time zone
-                                   for s in fp['deformation/gps_time'][:]])
-            ind = (timestamps>bgtime)&(timestamps<edtime)
-            ind = np.where(ind)[0]
-            data = fp['deformation/data'][ind,:]
-            timestamps = timestamps[ind]
+            # timestamps = np.array([datetime.fromtimestamp(s,tz) # apply time zone
+            #                        for s in fp['deformation/gps_time'][:]])
+            start_time = datetime.fromtimestamp(fp['deformation/gps_time'][0],tz)
+            end_time = datetime.fromtimestamp(fp['deformation/gps_time'][-1],tz)
+            N = fp['deformation/gps_time'].shape[0]
+            dt = (end_time-start_time).total_seconds()/(N-1.0)
+
+            bg_i = int((bgtime-start_time).total_seconds()/dt)+1
+            ed_i = int((edtime-start_time).total_seconds()/dt)
+            data = fp['deformation/data'][bg_i:ed_i,:]
             dx = fp['deformation/data'].attrs['dx']
+            timestamps = fp['deformation/gps_time'][bg_i:ed_i]
+            timestamps = np.array([datetime.fromtimestamp(s,tz) # apply time zone
+                                   for s in timestamps])
 
             # apply_gauge_length
             n = self.gauge_length_chanN//2
@@ -83,10 +91,11 @@ class Treble_io():
             filename = [filedf['filename'].iloc[bgfileid],filedf['filename'].iloc[edfileid]]
         return filename
     
-    def get_data_bydatetime(self,bgtime,edtime):
+    def get_data_bydatetime(self,bgtime,edtime,isPrint=False):
         files = self.get_filename(bgtime,edtime)
-        print('Getting data from file:', files)
-        print('time range:',bgtime, edtime)
+        if isPrint:
+            print('Getting data from file:', files)
+            print('time range:',bgtime, edtime)
         if len(files)==1:
             rt = read_Treble(files[0])
             DASdata = rt.get_data(bgtime,edtime,self.timezone)
