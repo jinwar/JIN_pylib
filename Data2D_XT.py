@@ -7,6 +7,7 @@ from scipy.signal import medfilt2d
 import matplotlib.dates as mdates
 from dateutil.parser import parse
 import h5py
+import copy
 
 class Data2D():
 
@@ -119,7 +120,8 @@ class Data2D():
         return extent
 
     def plot_waterfall(self,ischan = False, cmap=plt.get_cmap('bwr')
-            , timescale='second',use_timestamp=False,timefmt = '%m/%d %H:%M:%S', is_shorten=False):
+            , timescale='second',use_timestamp=False
+            ,timefmt = '%m/%d %H:%M:%S', is_shorten=False):
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
         if ~use_timestamp:
@@ -212,3 +214,21 @@ class Data2D():
         taxis = data.taxis + (data.start_time - self.start_time).total_seconds()
         self.taxis = np.concatenate((self.taxis,taxis))
         self.data = np.concatenate((self.data.T,data.data.T)).T
+
+def merge_data2D(data_list):
+    data_list = np.array(data_list)
+    bgtime_lst = np.array([d.start_time for d in data_list])
+    ind = np.argsort(bgtime_lst)
+    bgtime_lst = bgtime_lst[ind]
+    data_list = data_list[ind]
+
+    t_samples = [d.data.shape[1] for d in data_list]
+    N_samples = np.sum(t_samples)
+
+    bgtime = data_list[0].start_time
+    taxis_list = [d.taxis + (d.start_time-bgtime).total_seconds() for d in data_list]
+
+    merge_data = copy.deepcopy(data_list[0])
+    merge_data.data = np.concatenate([d.data.T for d in data_list]).T
+    merge_data.taxis = np.concatenate(taxis_list)
+    return merge_data

@@ -53,3 +53,4 @@ def Data2D_fkfilter_velocity(DASdata,vmin,vmax,filter_std=0):
         'applied velocity filter from {} to {}, with smoothing kernel: {}'
         .format(vmin,vmax,filter_std))
     return DASdata
+

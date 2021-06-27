@@ -19,18 +19,12 @@ class read_Treble():
     
     def get_data(self,bgtime,edtime,tz):
         with h5py.File(self.filename,'r') as fp:
-            # timestamps = np.array([datetime.fromtimestamp(s,tz) # apply time zone
-            #                        for s in fp['deformation/gps_time'][:]])
-            start_time = datetime.fromtimestamp(fp['deformation/gps_time'][0],tz)
-            end_time = datetime.fromtimestamp(fp['deformation/gps_time'][-1],tz)
-            N = fp['deformation/gps_time'].shape[0]
-            dt = (end_time-start_time).total_seconds()/(N-1.0)
+            timestamps = fp['deformation/gps_time'][:]
 
-            bg_i = int((bgtime-start_time).total_seconds()/dt)+1
-            ed_i = int((edtime-start_time).total_seconds()/dt)
-            data = fp['deformation/data'][bg_i:ed_i,:]
+            ind = (timestamps>=bgtime.timestamp())&(timestamps<edtime.timestamp())
+            data = fp['deformation/data'][ind,:]
             dx = fp['deformation/data'].attrs['dx']
-            timestamps = fp['deformation/gps_time'][bg_i:ed_i]
+            timestamps = timestamps[ind]
             timestamps = np.array([datetime.fromtimestamp(s,tz) # apply time zone
                                    for s in timestamps])
 
