@@ -22,6 +22,7 @@ class read_Treble():
             timestamps = fp['velocity/gps_time'][:]
 
             ind = (timestamps>=bgtime.timestamp())&(timestamps<edtime.timestamp())
+            ind = np.where(ind)[0]
             data = fp['velocity/data'][ind,:]
             dx = fp['velocity/data'].attrs['dx']
             timestamps = timestamps[ind]
