@@ -30,53 +30,26 @@ def butter_hppass(freqcut, fs, order=2):
     return b, a
 
 
-def bpfilter(odata, dt, lowcut, highcut, order=2):
+def bpfilter(data, dt, lowcut, highcut, order=2,axis=-1):
     ''' bpfilter(data, dt, lowcut, highcut, order=2)
 	'''
-    s = odata.shape
-    data = odata.flatten()
     fs = 1 / dt
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = filtfilt(b, a, data)
-    y = y.reshape(s)
+    y = filtfilt(b, a, data,axis=axis)
     return y
 
 
-def lpfilter(odata, dt, freqcut, order=2, plotSpectrum=False):
-    s = odata.shape
-    data = odata.flatten()
+def lpfilter(data, dt, freqcut, order=2, plotSpectrum=False,axis=-1):
     fs = 1 / dt
     b, a = butter_lppass(freqcut, fs, order=order)
-    if plotSpectrum:
-        w, h = freqz(b, a)
-        fig = plt.figure()
-        plt.title('Digital filter frequency response')
-        ax1 = fig.add_subplot(111)
-
-        plt.plot(w, 20 * np.log10(abs(h)), 'b')
-        plt.ylabel('Amplitude [dB]', color='b')
-        plt.xlabel('Frequency [rad/sample]')
-
-        ax2 = ax1.twinx()
-        angles = np.unwrap(np.angle(h))
-        plt.plot(w, angles, 'g')
-        plt.ylabel('Angle (radians)', color='g')
-        plt.grid()
-        plt.axis('tight')
-        plt.show()
-
-    y = filtfilt(b, a, data)
-    y = y.reshape(s)
+    y = filtfilt(b, a, data,axis=axis)
     return y
 
 
-def hpfilter(odata, dt, freqcut, order=2):
-    s = odata.shape
-    data = odata.flatten()
+def hpfilter(data, dt, freqcut, order=2,axis=-1):
     fs = 1 / dt
     b, a = butter_hppass(freqcut, fs, order=order)
-    y = filtfilt(b, a, data)
-    y = y.reshape(s)
+    y = filtfilt(b, a, data,axis=axis)
     return y
 
 
