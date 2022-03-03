@@ -99,8 +99,10 @@ class Data2D():
         self.taxis = self.taxis[1:]
         self.data = data
     
-    def plot_simple_waterfall(self):
-        plt.imshow(self.data,cmap=plt.get_cmap('bwr'),aspect='auto')
+    def plot_simple_waterfall(self,downsample = [1,1]):
+        extent = [0,self.data.shape[1],self.data.shape[0],0]
+        plt.imshow(self.data[::downsample[0],::downsample[1]]
+                ,cmap=plt.get_cmap('bwr'),aspect='auto',extent=extent)
     
     def get_extent(self,ischan=False,timescale='second',use_timestamp=False):
         xlim = np.array([self.taxis[0],self.taxis[-1]])
@@ -121,17 +123,14 @@ class Data2D():
 
     def plot_waterfall(self,ischan = False, cmap=plt.get_cmap('bwr')
             , timescale='second',use_timestamp=False
-            ,timefmt = '%m/%d %H:%M:%S', is_shorten=False):
+            ,timefmt = '%m/%d %H:%M:%S', is_shorten=False,downsample=[1,1]):
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
-        if ~use_timestamp:
-            plt.imshow(self.data,cmap = cmap, aspect='auto'
-                ,extent=extent)
+        plt.imshow(self.data[::downsample[0],::downsample[1]]
+                ,cmap = cmap, aspect='auto',extent=extent)
         if use_timestamp:
             if is_shorten:
                 plt.subplot2grid((5,1),(0,0),rowspan=4)
-            plt.imshow(self.data,cmap = cmap, aspect='auto'
-                ,extent=extent)
             plt.gca().xaxis_date()
             date_format = mdates.DateFormatter(timefmt)
             plt.gca().xaxis.set_major_formatter(date_format)
@@ -232,3 +231,8 @@ def merge_data2D(data_list):
     merge_data.data = np.concatenate([d.data.T for d in data_list]).T
     merge_data.taxis = np.concatenate(taxis_list)
     return merge_data
+
+def load_h5(file):
+    data = Data2D()
+    data.loadh5(file)
+    return data
