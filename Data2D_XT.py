@@ -136,11 +136,12 @@ class Data2D():
             plt.gca().xaxis.set_major_formatter(date_format)
             plt.xticks(rotation=45)
     
-    def fill_gap_zeros(self):
+    def fill_gap_zeros(self,fill_value=0):
         dt = np.median(np.diff(self.taxis))
         N = int(np.round((np.max(self.taxis)-np.min(self.taxis))/dt))+1
         new_taxis = np.linspace(np.min(self.taxis),np.max(self.taxis)+dt,N)
         new_data = np.zeros((self.data.shape[0],N))
+        new_data[:,:] = fill_value
         for i in range(self.data.shape[1]):
             ind = int(np.round(self.taxis[i]/dt))
             new_data[:,ind] = self.data[:,i]
