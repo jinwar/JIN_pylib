@@ -1,3 +1,4 @@
+from tkinter import W
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -14,6 +15,7 @@ class PickFrac():
             self.pickdf = pd.DataFrame(columns=['time','md'])
         self.lines = []
         self.cx = np.array([-1,1])
+        self.plot_current_only = False
     
     def draw(self):
         plt.draw()
@@ -28,11 +30,17 @@ class PickFrac():
             pass
         lines = []
         edtime = plt.gca().axis()[1]
+        axis_range = plt.gca().axis()
         for i,row in self.pickdf.iterrows():
             bgtime = pd.to_datetime(row['time'])
             bgtime = mdates.date2num(bgtime)
+            if self.plot_current_only:
+                if bgtime < axis_range[0]:
+                    continue
             lines.append(plt.gca().plot([bgtime,edtime],[row['md'],row['md']],'k--'))
+               
         self.lines = lines
+        plt.axis(axis_range)
         plt.draw()
 
     
@@ -60,6 +68,14 @@ class PickFrac():
             self.cx = self.cx*1.2
             plt.clim(self.cx)
             plt.draw()
+        
+        if event.key == 'w':
+            self.save()
+            print('Pick file saved')
+
+        if event.key == 'c':
+            self.plot_current_only = not self.plot_current_only
+            self.update_lines()
             
     def save(self):
         self.pickdf.to_csv(self.pickfile,index=False)

@@ -134,7 +134,7 @@ class Data2D():
             plt.gca().xaxis_date()
             date_format = mdates.DateFormatter(timefmt)
             plt.gca().xaxis.set_major_formatter(date_format)
-            plt.xticks(rotation=45)
+            plt.xticks(rotation=90)
     
     def fill_gap_zeros(self,fill_value=0,dt=None):
         if dt is None:
