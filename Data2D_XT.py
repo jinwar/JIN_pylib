@@ -76,17 +76,17 @@ class Data2D():
             print('cannot find chans field')
             pass
     
-    def lp_filter(self,corner_freq,order=2):
+    def lp_filter(self,corner_freq,order=2,axis=1):
         dt = np.median(np.diff(self.taxis))
-        for ichan in range(self.data.shape[0]):
-            self.data[ichan,:] = gjsignal.lpfilter(self.data[ichan,:]
-                ,dt,corner_freq,order=order)
+        self.data = gjsignal.lpfilter(self.data,dt,corner_freq,order=order,axis=axis)
 
-    def bp_filter(self,lowf,highf,order=2):
+    def hp_filter(self,corner_freq,order=2,axis=1):
         dt = np.median(np.diff(self.taxis))
-        for ichan in range(self.data.shape[0]):
-            self.data[ichan,:] = gjsignal.bpfilter(self.data[ichan,:]
-                ,dt,lowf,highf,order=order)
+        self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
+
+    def bp_filter(self,lowf,highf,order=2,axis=1):
+        dt = np.median(np.diff(self.taxis))
+        self.data = gjsignal.bpfilter(self.data,dt,lowf,highf,order=order,axis=axis)
     
     def down_sample(self,ds_R):
         dt = np.median(np.diff(self.taxis))
