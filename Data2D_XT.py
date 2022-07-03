@@ -6,6 +6,7 @@ from datetime import datetime,timedelta
 from scipy.signal import medfilt2d
 import matplotlib.dates as mdates
 from dateutil.parser import parse
+from copy import copy
 import h5py
 import copy
 
@@ -39,10 +40,42 @@ class Data2D():
     def set_mds(self,mds):
         self.mds = mds
     
-    def select_depth(self,mindp,maxdp):
+    def select_depth(self,mindp,maxdp,makecopy=False):
         ind = (self.mds>mindp)&(self.mds<maxdp)
-        self.mds = self.mds[ind]
-        self.data = self.data[ind,:]
+        if makecopy:
+            out_data = copy(self)
+            out_data.mds = self.mds[ind]
+            out_data.data = self.data[ind,:]
+            return out_data
+        else:
+            self.mds = self.mds[ind]
+            self.data = self.data[ind,:]
+
+    def _check_inputtime(self,t,t0):
+        out_t = t
+        if t is None:
+            out_t = t0
+        if type(t) is datetime:
+            out_t = (t-self.start_time).total_seconds()
+        return out_t
+
+    def select_time(self,bgtime,edtime,makecopy=False):
+        bgt = self._check_inputtime(bgtime,0)
+        edt = self._check_inputtime(edtime,self.taxis[-1])
+        
+        ind = (self.taxis>=bgt)&(self.taxis<=edt)
+        if makecopy:
+            out_data = copy.copy(self)
+            out_data.taxis = self.taxis[ind]
+            out_data.start_time += timedelta(seconds=out_data.taxis[0])
+            out_data.taxis -= out_data.taxis[0]
+            out_data.data = out_data.data[:,ind]
+            return out_data
+        else:
+            self.taxis = self.taxis[ind]
+            self.start_time += timedelta(seconds=self.taxis[0])
+            self.taxis -= self.taxis[0]
+            self.data = self.data[:,ind]
     
     def set_chans(self,chans):
         self.chans = chans
@@ -77,15 +110,24 @@ class Data2D():
             pass
     
     def lp_filter(self,corner_freq,order=2,axis=1):
-        dt = np.median(np.diff(self.taxis))
+        if axis == 1:
+            dt = np.median(np.diff(self.taxis))
+        if axis == 0:
+            dt = np.median(np.diff(self.mds))
         self.data = gjsignal.lpfilter(self.data,dt,corner_freq,order=order,axis=axis)
 
     def hp_filter(self,corner_freq,order=2,axis=1):
-        dt = np.median(np.diff(self.taxis))
+        if axis == 1:
+            dt = np.median(np.diff(self.taxis))
+        if axis == 0:
+            dt = np.median(np.diff(self.mds))
         self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
 
     def bp_filter(self,lowf,highf,order=2,axis=1):
-        dt = np.median(np.diff(self.taxis))
+        if axis == 1:
+            dt = np.median(np.diff(self.taxis))
+        if axis == 0:
+            dt = np.median(np.diff(self.mds))
         self.data = gjsignal.bpfilter(self.data,dt,lowf,highf,order=order,axis=axis)
     
     def down_sample(self,ds_R):
