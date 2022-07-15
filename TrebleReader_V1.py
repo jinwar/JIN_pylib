@@ -22,6 +22,7 @@ class read_Treble():
             timestamps = fp['deformation/gps_time'][:]
 
             ind = (timestamps>=bgtime.timestamp())&(timestamps<edtime.timestamp())
+            ind = np.where(ind)[0]
             data = fp['deformation/data'][ind,:]
             dx = fp['deformation/data'].attrs['dx']
             timestamps = timestamps[ind]
