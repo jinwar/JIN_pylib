@@ -54,3 +54,44 @@ def Data2D_fkfilter_velocity(DASdata,vmin,vmax,filter_std=0):
         .format(vmin,vmax,filter_std))
     return DASdata
 
+def disp_analysis(DASdata,v_array,f_array,upward=True):
+    dt = np.median(np.diff(DASdata.taxis))
+    dx = np.median(np.diff(DASdata.mds))
+    data = DASdata.data
+
+    dists = np.arange(data.shape[0])*dx
+
+    fftdata = np.fft.fft(data,axis=1)
+    freqs = np.fft.fftfreq(fftdata.shape[1],dt)
+
+    semb_mat = np.zeros((len(v_array),len(f_array)))
+
+    actual_f_array = np.zeros_like(f_array)
+
+    for iv in range(len(v_array)):
+        for ifreq in range(len(f_array)):
+            f_ind = np.argmin(np.abs(f_array[ifreq]-freqs))
+            actual_f_array[ifreq] = freqs[f_ind]
+            if upward:
+                phase_shift = np.exp(-1j*2*np.pi*freqs[f_ind]/v_array[iv]*dists)
+            else:
+                phase_shift = np.exp(1j*2*np.pi*freqs[f_ind]/v_array[iv]*dists)
+            shifted_data = fftdata[:,f_ind]*phase_shift
+            semb_mat[iv,ifreq] = np.abs(np.sum(shifted_data))
+    
+    result = {'semb_mat':semb_mat
+            ,'norm_semb_mat':semb_mat/np.max(semb_mat,axis=0)
+            ,'v_array':v_array
+            , 'input_f_array':f_array
+            , 'f_array': actual_f_array}
+
+    return result
+
+def plot_disp_result(result,plot_data = 'norm_semb_mat'):
+    data = result[plot_data]
+    f = result['f_array']
+    v = result['v_array']
+    extent = [f[0],f[-1],v[-1],v[0]]
+    plt.imshow(data,aspect='auto',extent=extent,cmap='seismic')
+
+
