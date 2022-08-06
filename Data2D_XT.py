@@ -154,6 +154,20 @@ class Data2D():
         self.data = data
         self.history.append('take_diff()')
     
+    def cumsum(self,axis=1):
+        data = np.cumsum(self.data,axis=axis)
+        if axis==1:
+            ds = np.diff(self.taxis)
+            ds = np.concatenate(([1],ds))
+            data = data*ds.reshape((1,-1))
+        if axis==0:
+            ds = np.diff(self.mds)
+            ds = np.concatenate(([1],ds))
+            data = data*ds.reshape((-1,1))
+
+        self.data = data
+        self.history.append(f'cumsum(axis={axis})')
+    
     def plot_simple_waterfall(self,downsample = [1,1]):
         extent = [0,self.data.shape[1],self.data.shape[0],0]
         plt.imshow(self.data[::downsample[0],::downsample[1]]
@@ -268,6 +282,7 @@ class Data2D():
         for k in f.keys():
             setattr(self,k,np.array(f[k]))
         f.close()
+        self.history = list(self.history)
     
     def right_merge(self,data):
         taxis = data.taxis + (data.start_time - self.start_time).total_seconds()
