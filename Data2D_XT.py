@@ -77,11 +77,15 @@ class Data2D():
             self.taxis -= self.taxis[0]
             self.data = self.data[:,ind]
     
+    def copy(self):
+        return copy.deepcopy(self)
+    
     def set_chans(self,chans):
         self.chans = chans
     
     def median_filter(self,kernel_size=(5,3)):
         self.data = medfilt2d(self.data,kernel_size=kernel_size)
+        self.history.append('median_filter(kernel_size={})'.format(str(kernel_size)))
     
     def window_data_time(self,bgtime, edtime,reset_startime=True):
         ind = (self.taxis>bgtime)&(self.taxis<edtime)
@@ -115,6 +119,8 @@ class Data2D():
         if axis == 0:
             dt = np.median(np.diff(self.mds))
         self.data = gjsignal.lpfilter(self.data,dt,corner_freq,order=order,axis=axis)
+        self.history.append('lp_filter(corner_freq={},order={},axis={})'
+                .format(corner_freq,order,axis))
 
     def hp_filter(self,corner_freq,order=2,axis=1):
         if axis == 1:
@@ -122,6 +128,8 @@ class Data2D():
         if axis == 0:
             dt = np.median(np.diff(self.mds))
         self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
+        self.history.append('hp_filter(corner_freq={},order={},axis={})'
+                .format(corner_freq,order,axis))
 
     def bp_filter(self,lowf,highf,order=2,axis=1):
         if axis == 1:
@@ -129,17 +137,22 @@ class Data2D():
         if axis == 0:
             dt = np.median(np.diff(self.mds))
         self.data = gjsignal.bpfilter(self.data,dt,lowf,highf,order=order,axis=axis)
+        self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
+                .format(lowf,highf,order,axis))
     
     def down_sample(self,ds_R):
         dt = np.median(np.diff(self.taxis))
         self.lp_filter(1/dt/2/ds_R*0.8)
         self.data = self.data[:,::ds_R]
         self.taxis = self.taxis[::ds_R]
+        self.history.append('down_sample({})'.format(ds_R))
 
-    def take_diff(self):
+    def take_time_diff(self):
         data = np.diff(self.data,axis=1)
-        self.taxis = self.taxis[1:]
+        data = data/np.diff(self.taxis).reshape((1,-1))
+        data = np.hstack((np.zeros((data.shape[0],1)),data))
         self.data = data
+        self.history.append('take_diff()')
     
     def plot_simple_waterfall(self,downsample = [1,1]):
         extent = [0,self.data.shape[1],self.data.shape[0],0]
@@ -190,6 +203,7 @@ class Data2D():
             new_data[:,ind] = self.data[:,i]
         self.data = new_data
         self.taxis = new_taxis
+        self.history.append(f'fill_gap_zeros(fill_value={fill_value},dt={dt})')
 
     def fill_gap_interp(self,dt=None):
         if dt is None:
@@ -201,6 +215,7 @@ class Data2D():
             new_data[i,:] = np.interp(new_taxis,self.taxis,self.data[i,:],left=0,right=0)
         self.data = new_data
         self.taxis = new_taxis
+        self.history.append(f'fill_gap_interp(dt={dt})')
     
     def get_value_by_depth(self,depth):
         ind = np.argmin(np.abs(self.mds-depth))
