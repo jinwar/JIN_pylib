@@ -17,12 +17,21 @@ class Data2D():
         self.start_time = None  # starting time using datetime
         self.taxis = []  # time axis in second from start_time
         self.chans = [] # fiber channel number
-        self.mds = []  # fiber physical distance or location
+        self.daxis = []  # fiber physical distance or location
         self.attrs = {'Python Class Version':'1.1'} # data attributes
         self.history = []
 
     def set_data(self,data):
         self.data = data
+    
+    # set mds linked to daxis to be compabible to old versions
+    @property
+    def mds(self):
+        return self.daxis
+
+    @mds.setter
+    def mds(self, mds):
+        self.daxis = mds
     
     def set_time_from_datetime(self,timestamps):
         self.start_time = timestamps[0]
