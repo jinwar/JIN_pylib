@@ -68,7 +68,7 @@ class Data2D():
             out_t = (t-self.start_time).total_seconds()
         return out_t
 
-    def select_time(self,bgtime,edtime,makecopy=False):
+    def select_time(self,bgtime,edtime,makecopy=False,reset_starttime=True):
         bgt = self._check_inputtime(bgtime,self.taxis[0])
         edt = self._check_inputtime(edtime,self.taxis[-1])
         
@@ -76,13 +76,15 @@ class Data2D():
         if makecopy:
             out_data = copy.copy(self)
             out_data.taxis = self.taxis[ind]
-            out_data.start_time += timedelta(seconds=out_data.taxis[0])
+            if reset_starttime:
+                out_data.start_time += timedelta(seconds=out_data.taxis[0])
             out_data.taxis -= out_data.taxis[0]
             out_data.data = out_data.data[:,ind]
             return out_data
         else:
             self.taxis = self.taxis[ind]
-            self.start_time += timedelta(seconds=self.taxis[0])
+            if reset_starttime:
+                self.start_time += timedelta(seconds=self.taxis[0])
             self.taxis -= self.taxis[0]
             self.data = self.data[:,ind]
 
