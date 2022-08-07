@@ -78,14 +78,14 @@ class Data2D():
             out_data.taxis = self.taxis[ind]
             if reset_starttime:
                 out_data.start_time += timedelta(seconds=out_data.taxis[0])
-            out_data.taxis -= out_data.taxis[0]
+                out_data.taxis -= out_data.taxis[0]
             out_data.data = out_data.data[:,ind]
             return out_data
         else:
             self.taxis = self.taxis[ind]
             if reset_starttime:
                 self.start_time += timedelta(seconds=self.taxis[0])
-            self.taxis -= self.taxis[0]
+                self.taxis -= self.taxis[0]
             self.data = self.data[:,ind]
 
     def select_depth(self,bgdp,eddp,makecopy=False,ischan=False):
