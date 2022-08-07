@@ -69,7 +69,7 @@ class Data2D():
         return out_t
 
     def select_time(self,bgtime,edtime,makecopy=False):
-        bgt = self._check_inputtime(bgtime,0)
+        bgt = self._check_inputtime(bgtime,self.taxis[0])
         edt = self._check_inputtime(edtime,self.taxis[-1])
         
         ind = (self.taxis>=bgt)&(self.taxis<=edt)
@@ -85,6 +85,40 @@ class Data2D():
             self.start_time += timedelta(seconds=self.taxis[0])
             self.taxis -= self.taxis[0]
             self.data = self.data[:,ind]
+
+    def select_depth(self,bgdp,eddp,makecopy=False,ischan=False):
+        
+        if ischan:
+            dists = self.chans
+        else:
+            dists = self.daxis
+        bgt = self._check_inputtime(bgdp,dists[0])
+        edt = self._check_inputtime(eddp,dists[-1])
+        
+        ind = (dists>=bgdp)&(dists<=eddp)
+        if makecopy:
+            out_data = copy.copy(self)
+            out_data.data = out_data.data[ind,:]
+            try:
+                out_data.daxis =out_data.daxis[ind]
+            except: 
+                pass
+            try:
+                out_data.chans =out_data.chans[ind]
+            except: 
+                pass
+
+            return out_data
+        else:
+            self.data = self.data[ind,:]
+            try:
+                self.daxis =self.daxis[ind]
+            except: 
+                pass
+            try:
+                self.chans =self.chans[ind]
+            except: 
+                pass
     
     def copy(self):
         return copy.deepcopy(self)
