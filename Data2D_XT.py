@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime,timedelta
-from scipy.signal import medfilt2d
+from scipy.signal import medfilt2d,tukey
 import matplotlib.dates as mdates
 from dateutil.parser import parse
 from copy import copy
@@ -167,20 +167,22 @@ class Data2D():
         self.history.append('lp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
 
-    def hp_filter(self,corner_freq,order=2,axis=1):
+    def hp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.1):
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
+        self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('hp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
 
-    def bp_filter(self,lowf,highf,order=2,axis=1):
+    def bp_filter(self,lowf,highf,order=2,axis=1,edge_taper=0.1):
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
+        self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         self.data = gjsignal.bpfilter(self.data,dt,lowf,highf,order=order,axis=axis)
         self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
                 .format(lowf,highf,order,axis))
