@@ -270,7 +270,7 @@ class Data2D():
         if dt is None:
             dt = np.median(np.diff(self.taxis))
         N = int(np.round((np.max(self.taxis)-np.min(self.taxis))/dt))+1
-        new_taxis = np.linspace(np.min(self.taxis),np.max(self.taxis)+dt,N)
+        new_taxis = np.linspace(np.min(self.taxis),np.max(self.taxis),N)
         new_data = np.zeros((self.data.shape[0],N))
         for i in range(self.data.shape[0]):
             new_data[i,:] = np.interp(new_taxis,self.taxis,self.data[i,:],left=0,right=0)
