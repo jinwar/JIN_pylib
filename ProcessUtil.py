@@ -81,7 +81,7 @@ def fk_velocity_analysis(DASdata,vmin, vmax
 
     def fun(points):
         val = interpn(coors,fkamp,points
-            ,bounds_error=False,fill_value=0,method='splinef2d')
+            ,bounds_error=False,fill_value=np.nan,method='splinef2d')
         return val
     
     v_array = np.linspace(vmin,vmax,grid_search_num)
@@ -95,7 +95,7 @@ def fk_velocity_analysis(DASdata,vmin, vmax
         else:
             k = DASdata.kaxis
             f = k*vel
-        amp.append(np.sum(fun(list(zip(k,f)))))
+        amp.append(np.nanmean(fun(list(zip(k,f)))))
     amp=np.array(amp)
 
     dense_v_array = np.linspace(vmin,vmax,grid_search_num*find_peak_dense_sample)
