@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from . import gjsignal
 import numpy as np
 import pandas as pd
@@ -49,17 +50,6 @@ class Data2D():
     def set_mds(self,mds):
         self.mds = mds
     
-    def select_depth(self,mindp,maxdp,makecopy=False):
-        ind = (self.mds>mindp)&(self.mds<maxdp)
-        if makecopy:
-            out_data = copy(self)
-            out_data.mds = self.mds[ind]
-            out_data.data = self.data[ind,:]
-            return out_data
-        else:
-            self.mds = self.mds[ind]
-            self.data = self.data[ind,:]
-
     def _check_inputtime(self,t,t0):
         out_t = t
         if t is None:
@@ -200,6 +190,14 @@ class Data2D():
         data = np.hstack((np.zeros((data.shape[0],1)),data))
         self.data = data
         self.history.append('take_diff()')
+    
+    def apply_gauge_length(self,gauge_chan_num=1):
+        strain_data = self.data[gauge_chan_num:,:]-self.data[:-gauge_chan_num,:]
+        strain_data /= (self.daxis[gauge_chan_num:]-self.daxis[:-gauge_chan_num]).reshape((-1,1))
+        self.data = strain_data
+        self.daxis = (self.daxis[gauge_chan_num:]+self.daxis[:-gauge_chan_num])/2
+        self.history.append(f'apply_gauge_length(gauge_chan_num={gauge_chan_num})')
+
     
     def cumsum(self,axis=1):
         data = np.cumsum(self.data,axis=axis)
@@ -358,3 +356,12 @@ def load_h5(file):
     data = Data2D()
     data.loadh5(file)
     return data
+
+def Patch_to_Data2D(dascore_data):
+    data = dascore_data
+    DASdata = Data2D()
+    DASdata.data = data.data.T
+    DASdata.daxis = data.coords['distance']
+    DASdata.start_time = pd.to_datetime(data.coords['time'][0])
+    DASdata.taxis = (data.coords['time']-data.coords['time'][0])/np.timedelta64(1,'s')
+    return DASdata
