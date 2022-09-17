@@ -360,7 +360,11 @@ def load_h5(file):
 def Patch_to_Data2D(dascore_data):
     data = dascore_data
     DASdata = Data2D()
-    DASdata.data = data.data.T
+    axis = data.dim.index('distance')
+    if axis == 1:
+        DASdata.data = data.data.T
+    else:
+        DASdata.data = data.data
     DASdata.daxis = data.coords['distance']
     DASdata.start_time = pd.to_datetime(data.coords['time'][0])
     DASdata.taxis = (data.coords['time']-data.coords['time'][0])/np.timedelta64(1,'s')
