@@ -237,7 +237,10 @@ class Data2D():
 
     def plot_waterfall(self,ischan = False, cmap=plt.get_cmap('bwr')
             , timescale='second',use_timestamp=False
-            ,timefmt = '%m/%d %H:%M:%S', is_shorten=False,downsample=[1,1]):
+            ,timefmt = '%m/%d\n%H:%M:%S', is_shorten=False
+            ,downsample=[1,1]
+            ,xaxis_rotation=0
+            ):
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
         plt.imshow(self.data[::downsample[0],::downsample[1]]
@@ -248,7 +251,7 @@ class Data2D():
             plt.gca().xaxis_date()
             date_format = mdates.DateFormatter(timefmt)
             plt.gca().xaxis.set_major_formatter(date_format)
-            plt.xticks(rotation=90)
+            plt.xticks(rotation=xaxis_rotation)
     
     def fill_gap_zeros(self,fill_value=0,dt=None):
         if dt is None:
