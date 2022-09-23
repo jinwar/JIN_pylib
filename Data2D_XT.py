@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from . import gjsignal
+from .VizUtil import PrecisionDateFormatter
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -237,21 +238,26 @@ class Data2D():
 
     def plot_waterfall(self,ischan = False, cmap=plt.get_cmap('bwr')
             , timescale='second',use_timestamp=False
-            ,timefmt = '%m/%d\n%H:%M:%S', is_shorten=False
             ,downsample=[1,1]
             ,xaxis_rotation=0
+            ,xtickN = 4
+            ,timefmt = '%m/%d\n%H:%M:%S.{ms}' 
+            ,timefmt_ms_precision = 1
             ):
+        '''
+        timescale options: 'second','hour','day'
+        '''
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
         plt.imshow(self.data[::downsample[0],::downsample[1]]
                 ,cmap = cmap, aspect='auto',extent=extent)
         if use_timestamp:
-            if is_shorten:
-                plt.subplot2grid((5,1),(0,0),rowspan=4)
             plt.gca().xaxis_date()
-            date_format = mdates.DateFormatter(timefmt)
-            plt.gca().xaxis.set_major_formatter(date_format)
+            date_format = PrecisionDateFormatter(timefmt
+                ,precision=timefmt_ms_precision)
+            plt.gca().xaxis.set_major_locator(plt.MaxNLocator(xtickN))
             plt.xticks(rotation=xaxis_rotation)
+            plt.gca().xaxis.set_major_formatter(date_format)
     
     def fill_gap_zeros(self,fill_value=0,dt=None):
         if dt is None:
