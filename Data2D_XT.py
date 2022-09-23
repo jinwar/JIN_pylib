@@ -363,7 +363,7 @@ def load_h5(file):
 def Patch_to_Data2D(dascore_data):
     data = dascore_data
     DASdata = Data2D()
-    axis = data.dim.index('distance')
+    axis = data.dims.index('distance')
     if axis == 1:
         DASdata.data = data.data.T
     else:
