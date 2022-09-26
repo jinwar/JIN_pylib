@@ -192,3 +192,16 @@ def plot_disp_result(result,plot_data = 'norm_semb_mat'):
     plt.imshow(data,aspect='auto',extent=extent,cmap='seismic')
 
 
+def spectrum_analysis(DASdata,depth_range=None):
+    if depth_range is None:
+        ind = DASdata.daxis>-np.inf
+    else:
+        ind = (DASdata.daxis>=depth_range[0])&(DASdata.daxis<=depth_range[1])
+    data = DASdata.data[ind,:]
+    dt = np.median(np.diff(DASdata.taxis))
+    f,amp = gjsignal.amp_spectrum(data[0,:],dt)
+    for ichan in range(1,data.shape[0]):
+        f,tmp = gjsignal.amp_spectrum(data[ichan,:],dt)
+        amp += tmp
+    amp /= data.shape[0]
+    return f, amp
