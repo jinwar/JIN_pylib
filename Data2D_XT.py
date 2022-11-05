@@ -231,7 +231,8 @@ class Data2D():
             ylim = [self.mds[-1],self.mds[0]]
         if use_timestamp:
             edtime = self.start_time + timedelta(seconds=self.taxis[-1])
-            xlim = [self.start_time,edtime]
+            bgtime = self.start_time + timedelta(seconds=self.taxis[0])
+            xlim = [bgtime,edtime]
             xlim = mdates.date2num(xlim)
         extent = [xlim[0],xlim[-1],ylim[0],ylim[-1]]
         return extent
