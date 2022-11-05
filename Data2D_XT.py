@@ -58,6 +58,10 @@ class Data2D():
         if type(t) is datetime:
             out_t = (t-self.start_time).total_seconds()
         return out_t
+    
+    def reset_starttime(self):
+        self.start_time += timedelta(seconds=self.taxis[0])
+        self.taxis -= self.taxis[0]
 
     def select_time(self,bgtime,edtime,makecopy=False,reset_starttime=True):
         bgt = self._check_inputtime(bgtime,self.taxis[0])
