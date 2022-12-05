@@ -28,7 +28,7 @@ def read_NB_csv(filename):
     return Ddata
 
 class NB_h5:
-    def __init__(self,filename):
+    def __init__(self,filename,transverse = False):
         with h5py.File(filename, 'r') as f:
             depth = f['depth'][:]
             timestamps = f['stamps'][:]
@@ -38,6 +38,7 @@ class NB_h5:
         self.timestamps = timestamps
         self.depth = depth
         self.filename = filename
+        self.transverse = transverse
     
     
     def select(self, time=(None,None), depth=(None,None)):
@@ -61,7 +62,11 @@ class NB_h5:
         print('depth index:',bg_d,ed_d)
 
         with h5py.File(self.filename, 'r') as f:
-            data = f['data'][bg_d:ed_d,bg_t:ed_t]
+            if self.transverse:
+                data = f['data'][bg_t:ed_t,bg_d:ed_d]
+                data = data.T
+            else:
+                data = f['data'][bg_d:ed_d,bg_t:ed_t]
         
         DSSdata = Data2D()
         DSSdata.data = data
