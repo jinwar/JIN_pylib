@@ -75,3 +75,53 @@ class NB_h5:
         return DSSdata
 
 
+def slippage_removal(trc,detect_thres=3,data_point_removal=4
+        ,sm_N=2,abs_thres=False,local_std_N=500):
+    # calculate strain rate
+    trc_diff = np.diff(trc)
+    # detect slippage events
+    if abs_thres:
+        ind = np.abs(trc_diff)>detect_thres
+    else:
+        ind = np.abs(trc_diff)>detect_thres*np.std(trc_diff)
+    ind = np.where(ind)[0]
+
+    if len(ind)>len(trc)*0.2:
+        return trc
+    
+    # for each slippage, check local variance again
+    if not abs_thres:
+        ind_to_remove = []
+        for i in range(len(ind)-1):
+            bgind = np.max((0,ind[i]-local_std_N//2))
+            edind = np.min((ind[i]+local_std_N//2,len(trc_diff)))
+
+            local_std = np.std(trc_diff[bgind:edind])
+            if np.abs(trc_diff[ind[i]]) < detect_thres*local_std:
+                ind_to_remove.append(i)
+        
+        ind = np.delete(ind,ind_to_remove)
+
+    
+    # remove data points after slippage events
+    new_ind = []
+    for i in ind:
+        for j in range(0,data_point_removal):
+            if i+j < len(trc_diff)-1:
+                new_ind.append(i+j)
+            
+    if len(new_ind) == 0 :
+        return trc
+        
+    # perform interpolation
+    good_ind = np.abs(trc_diff)>-1
+    good_ind[new_ind] = False
+    x = np.arange(len(trc_diff))
+    good_trc_diff = trc_diff[good_ind].copy()
+    good_trc_diff = np.convolve(good_trc_diff,np.ones(sm_N)/sm_N,'same')
+    trc_diff[~good_ind] = np.interp(x[~good_ind],x[good_ind],good_trc_diff)
+    # change back to strain change
+    trc_cor = np.cumsum(trc_diff)
+    trc_cor = np.concatenate(([0],trc_cor))
+    return trc_cor
+
