@@ -32,6 +32,7 @@ class NB_h5:
         with h5py.File(filename, 'r') as f:
             depth = f['depth'][:]
             timestamps = f['stamps'][:]
+            datashape = f['data'].shape
         timestamps = [s.decode('utf-8') for s in timestamps]
         timestamps = pd.to_datetime(timestamps)
 
@@ -39,7 +40,13 @@ class NB_h5:
         self.depth = depth
         self.filename = filename
         self.transverse = transverse
+        self.datashape = datashape
     
+    def info(self):
+        print(f'data shape (depth,time): {self.datashape}')
+        print(f'Time Range: {self.timestamps[0]} - {self.timestamps[-1]}')
+        print(f'Depth Range: {self.depth[0]} - {self.depth[-1]}')
+
     
     def select(self, time=(None,None), depth=(None,None)):
 
