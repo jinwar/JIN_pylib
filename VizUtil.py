@@ -166,3 +166,12 @@ class PrecisionDateFormatter(ticker.Formatter):
 
     def set_tzinfo(self, tz):
         self.tz = tz
+
+
+def plot_interactive(x,y):
+    import plotly.express as px
+    df = pd.DataFrame()
+    df['x'] = x
+    df['y'] = y
+    fig = px.line(data_frame=df,x='x',y='y')
+    fig.show()
