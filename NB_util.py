@@ -83,7 +83,7 @@ class NB_h5:
 
 
 def slippage_removal(trc,detect_thres=3,data_point_removal=4
-        ,sm_N=2,abs_thres=False,local_std_N=500):
+        ,sm_N=2,abs_thres=False,local_std_N=500,is_interp=True):
     # calculate strain rate
     trc_diff = np.diff(trc)
     # detect slippage events
@@ -126,7 +126,10 @@ def slippage_removal(trc,detect_thres=3,data_point_removal=4
     x = np.arange(len(trc_diff))
     good_trc_diff = trc_diff[good_ind].copy()
     good_trc_diff = np.convolve(good_trc_diff,np.ones(sm_N)/sm_N,'same')
-    trc_diff[~good_ind] = np.interp(x[~good_ind],x[good_ind],good_trc_diff)
+    if is_interp:
+        trc_diff[~good_ind] = np.interp(x[~good_ind],x[good_ind],good_trc_diff)
+    else:
+        trc_diff[~good_ind] = 0
     # change back to strain change
     trc_cor = np.cumsum(trc_diff)
     trc_cor = np.concatenate(([0],trc_cor))
