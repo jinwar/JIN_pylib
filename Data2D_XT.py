@@ -265,6 +265,9 @@ class Data2D():
             plt.gca().xaxis.set_major_formatter(date_format)
     
     def fill_gap_zeros(self,fill_value=0,dt=None):
+        """
+        Filling data gap with zeros or with a fixed value
+        """
         if dt is None:
             dt = np.median(np.diff(self.taxis))
         N = int(np.round((np.max(self.taxis)-np.min(self.taxis))/dt))+1
@@ -304,6 +307,15 @@ class Data2D():
         ind = np.argmin(np.abs(self.taxis-dt))
         output_time = self.start_time + timedelta(seconds=self.taxis[ind])
         return output_time,self.data[:,ind]
+    
+    def make_audio_file(self,filename,bgdp=None,eddp=None):
+        from scipy.io.wavfile import write
+        DASdata = self.select_depth(bgdp,eddp,makecopy=True)
+        rate = int(1/np.median(np.diff(DASdata.taxis)))
+        data = np.mean(DASdata.data,axis=0)
+        scaled = np.int16(data / np.max(np.abs(data)) * 32767)
+        write(filename, rate, scaled)
+        return scaled
     
     def saveh5(self,filename):
         with h5py.File(filename,'w') as f:
