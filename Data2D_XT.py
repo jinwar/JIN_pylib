@@ -359,6 +359,11 @@ class Data2D():
         taxis = data.taxis + (data.start_time - self.start_time).total_seconds()
         self.taxis = np.concatenate((self.taxis,taxis))
         self.data = np.concatenate((self.data.T,data.data.T)).T
+    
+    def quick_populate(self,data,dt,dx):
+        self.data = data
+        self.taxis = np.arange(data.shape[1])*dt
+        self.daxis = np.arange(data.shape[0])*dx
 
 def merge_data2D(data_list):
     data_list = np.array(data_list)
