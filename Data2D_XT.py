@@ -264,7 +264,7 @@ class Data2D():
             plt.xticks(rotation=xaxis_rotation)
             plt.gca().xaxis.set_major_formatter(date_format)
 
-    def plot_wiggle(self,scale=1,trace_step = 1):
+    def plot_wiggle(self,scale=1,trace_step = 1,linewidth=1):
         # Extract the data, time axis, and distance axis from the seismic_data object
         data = self.data
         taxis = self.taxis
@@ -274,19 +274,19 @@ class Data2D():
         nt = len(taxis)
         nd = len(daxis)
 
-        # Create a new figure
-        fig = plt.figure(figsize=(10, 6))
-
         # Loop over each trace
         for i in range(0,nd,trace_step):
             # Scale and shift the data for this trace
             trace = data[i, :] * scale + daxis[i]
 
             # Plot the trace as a line
-            plt.plot(trace, taxis, color='k')
+            plt.plot(trace, taxis, color='k',linewidth=linewidth)
 
             # Fill between the trace and the zero line
-            plt.fill_betweenx(taxis, daxis[i], trace, where=(trace>daxis[i]), color='k', linewidth=0.5)
+            plt.fill_betweenx(taxis, daxis[i], trace, where=(trace>daxis[i]), color='r', linewidth=0.5*linewidth)
+            plt.fill_betweenx(taxis, daxis[i], trace, where=(trace<daxis[i]), color='b', linewidth=0.5*linewidth)
+        
+        plt.gca().invert_yaxis()
 
     
     def fill_gap_zeros(self,fill_value=0,dt=None):
