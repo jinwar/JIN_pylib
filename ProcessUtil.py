@@ -214,7 +214,7 @@ def spectrum_transform_2D(DASdata):
         f,amp = gjsignal.amp_spectrum(DASdata.data[i,:],dt)
         data[i,:] = amp
     
-    spe_data = Data2D_XT()
+    spe_data = Data2D_XT.Data2D()
     spe_data.taxis = f
     spe_data.data = data
     spe_data.daxis = DASdata.daxis
