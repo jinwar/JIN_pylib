@@ -317,6 +317,13 @@ class Data2D():
         self.data = new_data
         self.taxis = new_taxis
         self.history.append(f'fill_gap_interp(dt={dt})')
+
+    def interp_time(self,new_taxis):
+        new_data = np.zeros((self.data.shape[0],len(new_taxis)))
+        for i in range(self.data.shape[0]):
+            new_data[i,:] = np.interp(new_taxis,self.taxis,self.data[i,:],left=0,right=0)
+        self.data = new_data
+        self.taxis = new_taxis
     
     def get_value_by_depth(self,depth):
         ind = np.argmin(np.abs(self.mds-depth))
