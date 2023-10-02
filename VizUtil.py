@@ -135,7 +135,7 @@ class PrecisionDateFormatter(ticker.Formatter):
 
     """
 
-    def __init__(self, fmt, precision=3, tz=None):
+    def __init__(self, fmt, precision=3):
         """
         Parameters
         ----------
@@ -144,12 +144,8 @@ class PrecisionDateFormatter(ticker.Formatter):
         Usage: ax.xaxis.set_major_formatter(PrecisionDateFormatter('%H:%M:%S.{ms}'))
         """
         from matplotlib.dates import num2date
-        if tz is None:
-            from matplotlib.dates import _get_rc_timezone
-            tz = _get_rc_timezone()
         self.num2date = num2date
         self.fmt = fmt
-        self.tz = tz
         self.precision = precision
 
     def __call__(self, x, pos=0):
@@ -159,13 +155,11 @@ class PrecisionDateFormatter(ticker.Formatter):
                              "you have not informed the axis that it is "
                              "plotting dates, e.g., with ax.xaxis_date()")
 
-        dt = self.num2date(x, self.tz)
+        dt = self.num2date(x)
         ms = dt.strftime("%f")[:self.precision]
 
         return dt.strftime(self.fmt).format(ms=ms)
 
-    def set_tzinfo(self, tz):
-        self.tz = tz
 
 
 def plot_interactive(x,y):
