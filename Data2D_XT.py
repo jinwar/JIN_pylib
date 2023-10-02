@@ -204,7 +204,7 @@ class Data2D():
         self.history.append(f'apply_gauge_length(gauge_chan_num={gauge_chan_num})')
 
     
-    def cumsum(self,axis=1):
+    def cumsum(self,axis=1,makecopy = False):
         data = np.cumsum(self.data,axis=axis)
         if axis==1:
             ds = np.diff(self.taxis)
@@ -215,8 +215,14 @@ class Data2D():
             ds = np.concatenate(([1],ds))
             data = data*ds.reshape((-1,1))
 
-        self.data = data
-        self.history.append(f'cumsum(axis={axis})')
+        if makecopy:
+            out_data = self.copy()
+            out_data.data = data
+            out_data.history.append(f'cumsum(axis={axis})')
+            return out_data
+        else:
+            self.data = data
+            self.history.append(f'cumsum(axis={axis})')
     
     def plot_simple_waterfall(self,downsample = [1,1]):
         extent = [0,self.data.shape[1],self.data.shape[0],0]
