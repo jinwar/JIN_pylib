@@ -254,14 +254,18 @@ class Data2D():
             ,xtickN = 4
             ,timefmt = '%m/%d\n%H:%M:%S.{ms}' 
             ,timefmt_ms_precision = 1
+            ,scale = None
+            ,islog = False
             ):
         '''
         timescale options: 'second','hour','day'
         '''
         extent = self.get_extent(ischan=ischan
             ,timescale=timescale,use_timestamp=use_timestamp)
-        plt.imshow(self.data[::downsample[0],::downsample[1]]
-                ,cmap = cmap, aspect='auto',extent=extent)
+        plotdata = self.data[::downsample[0],::downsample[1]]
+        if islog:
+            plotdata = 10*np.log10(plotdata)
+        plt.imshow(plotdata ,cmap = cmap, aspect='auto',extent=extent)
         if use_timestamp:
             plt.gca().xaxis_date()
             date_format = PrecisionDateFormatter(timefmt
@@ -269,6 +273,14 @@ class Data2D():
             plt.gca().xaxis.set_major_locator(plt.MaxNLocator(xtickN))
             plt.xticks(rotation=xaxis_rotation)
             plt.gca().xaxis.set_major_formatter(date_format)
+        if scale is not None:
+            if isinstance(scale,(int,float)):
+                minval = np.nanpercentile(plotdata,scale/2)
+                maxval = np.nanpercentile(plotdata,100-scale/2)
+                plt.clim(minval,maxval)
+            elif isinstance(scale,(list,tuple,np.ndarray)):
+                plt.clim(scale)
+        
 
     def plot_wiggle(self,scale=1,trace_step = 1,linewidth=1):
         # Extract the data, time axis, and distance axis from the seismic_data object
