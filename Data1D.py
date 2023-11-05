@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from .BasicClass import BasicClass
 import matplotlib.dates as mdates
 from datetime import datetime, timedelta
+from .VizUtil import PrecisionDateFormatter
+from dateutil.parser import parse
 
 class PumpCurve(BasicClass):
 
@@ -18,6 +20,9 @@ class PumpCurve(BasicClass):
     
     def set_plot_columns(self,cols):
         self.plot_cols = cols
+    
+    def clean_plot_columns(self):
+        self.df[self.plot_cols] = self.df[self.plot_cols].applymap(replace_non_float_with_nan)
     
     def set_time_from_datetime(self,timestamps):
         self.start_time = timestamps[0]
@@ -36,7 +41,9 @@ class PumpCurve(BasicClass):
              for t in timestamps])
         self.timestamps = timestamps
     
-    def plot_multi_cols(self,timescale='second',use_timestamp=False,legend_loc='best'):
+    def plot_multi_cols(self,timescale='second',use_timestamp=False,legend_loc='best',
+                xaxis_rotation=0 ,xtickN = 4 ,timefmt = '%m/%d\n%H:%M:%S.{ms}' ,
+                timefmt_ms_precision = 1):
         ts = 1
         if timescale == 'hour':
             ts = 3600
@@ -61,13 +68,15 @@ class PumpCurve(BasicClass):
             ylim = axs[i].axis()[2:4]
             axs[i].set_ylim(ylim[0],ylim[1]*1.2)
         if use_timestamp:
-            axs[0].xaxis_date()
-            date_format = mdates.DateFormatter('%m/%d %H:%M')
-            axs[0].xaxis.set_major_formatter(date_format)
-            axs[0].tick_params(axis='x',labelrotation=45)
+            plt.gca().xaxis_date()
+            date_format = PrecisionDateFormatter(timefmt
+                ,precision=timefmt_ms_precision)
+            plt.gca().xaxis.set_major_locator(plt.MaxNLocator(xtickN))
+            plt.xticks(rotation=xaxis_rotation)
+            plt.gca().xaxis.set_major_formatter(date_format)
         axs[0].legend(lines, [l.get_label() for l in lines],loc=legend_loc,fontsize=5)
         
-    def plot_col(self,col,timescale='second',use_timestamp=False,is_shrink=False):
+    def plot_single_col(self,col,timescale='second',use_timestamp=False,is_shrink=False):
         ts = 1
         if timescale == 'hour':
             ts = 3600
@@ -86,3 +95,9 @@ class PumpCurve(BasicClass):
             ax.xaxis.set_major_formatter(date_format)
             ax.tick_params(axis='x',labelrotation=45)
         
+# Define a function to replace non-float values with np.nan
+def replace_non_float_with_nan(value):
+    if isinstance(value, (int, float)):
+        return value
+    else:
+        return np.nan

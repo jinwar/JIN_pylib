@@ -57,6 +57,8 @@ class Data2D():
             out_t = t0
         if type(t) is datetime:
             out_t = (t-self.start_time).total_seconds()
+        if isinstance(t,str):
+            out_t = (parse(t)-self.start_time).total_seconds()
         return out_t
     
     def reset_starttime(self):
