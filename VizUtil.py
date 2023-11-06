@@ -8,16 +8,20 @@ from dateutil.parser import parse
 
 class CoPlot_Waterfall_Pumping:
 
-    def __init__(self,fig,Ddata,Pdata):
+    def __init__(self,fig,Ddata,Pdata,
+            scale=10,c_center=0,c_range=1):
         self.fig = fig
         self.Pdata = Pdata
         self.Ddata = Ddata
+        self.default_c_center = c_center
+        self.default_c_range = c_range
         self.define_widgets()
 
 
     def define_widgets(self):
-        c_center = widgets.FloatText(value=0.0,description='Color Center')
-        c_range = widgets.FloatText(value=1.0,description='Color Range')
+
+        c_center = widgets.FloatText(value=self.default_c_center,description='Color Center')
+        c_range = widgets.FloatText(value=self.default_c_range,description='Color Range')
         update_button = widgets.Button(description="Update Fig")
         reset_button = widgets.Button(description="Reset Fig")
             
