@@ -46,19 +46,19 @@ class CoPlot_Waterfall_Pumping:
         plt.clim(cx*self.c_range.value+self.c_center.value)
 
     
-    def draw(self):
+    def draw(self,waterfall_plot_args = {}, curve_plot_args={}):
         self.fig.clf()
         cx = np.array([-1,1])
 
         axs = [None,None]
         axs[0] = plt.subplot2grid((5,10),(0,0),rowspan=3,colspan=9)
-        self.Ddata.plot_waterfall(use_timestamp=True)
+        self.Ddata.plot_waterfall(use_timestamp=True,**waterfall_plot_args)
         plt.clim(cx*self.c_range.value+self.c_center.value)
         plt.setp(axs[0].get_xticklabels(), visible=False)
         cbaxes = self.fig.add_axes([0.85, 0.45, 0.02, 0.4])
         plt.colorbar(cax=cbaxes)
         axs[1] = plt.subplot2grid((5,10),(3,0),rowspan=1,sharex = axs[0],colspan=9)
-        self.Pdata.plot_multi_cols(use_timestamp=True)
+        self.Pdata.plot_multi_cols(use_timestamp=True,**curve_plot_args)
         self.axs = axs
 
 
