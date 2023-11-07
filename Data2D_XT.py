@@ -360,6 +360,19 @@ class Data2D():
         output_time = self.start_time + timedelta(seconds=self.taxis[ind])
         return output_time,self.data[:,ind]
     
+    def get_time_average_value(self,center_time,time_range):
+        bgtime = (center_time-time_range/2-self.start_time).total_seconds()
+        edtime = (center_time+time_range/2-self.start_time).total_seconds()
+        ind = (self.taxis>=bgtime)&(self.taxis<=edtime)
+        return np.nanmean(self.data[:,ind],axis=1)
+
+    def get_time_average_value(self,center_depth,depth_range):
+        bgdist = center_depth-depth_range/2
+        eddist = center_depth+depth_range/2
+        ind = (self.daxis>=bgdist)&(self.daxis<=eddist)
+        return np.nanmean(self.data[ind,:],axis=0)
+
+    
     def make_audio_file(self,filename,bgdp=None,eddp=None):
         from scipy.io.wavfile import write
         DASdata = self.select_depth(bgdp,eddp,makecopy=True)
