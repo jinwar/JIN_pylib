@@ -17,6 +17,9 @@ class PickFrac():
         self.cx = np.array([-1,1])
         self.plot_current_only = False
     
+    def set_init_c_range(self, crange):
+        self.cx = np.array([-1,1])*crange
+    
     def draw(self):
         plt.draw()
         self.cid = self.fig.canvas.mpl_connect('key_press_event',self.event_handle)
