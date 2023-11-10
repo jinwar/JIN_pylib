@@ -360,13 +360,20 @@ class Data2D():
         output_time = self.start_time + timedelta(seconds=self.taxis[ind])
         return output_time,self.data[:,ind]
     
-    def get_time_average_value(self,center_time,time_range):
-        bgtime = (center_time-time_range/2-self.start_time).total_seconds()
-        edtime = (center_time+time_range/2-self.start_time).total_seconds()
+    def get_time_average_value(self,center_time,**kargs):
+        '''
+        Usage: 
+            center_time = '2023-01-01 05:02:12' # can also be datetime
+            get_time_average_value(center_time,seconds=5)
+        '''
+        center_time = self._check_inputtime(center_time,None)
+        time_range = timedelta(**kargs).total_seconds()
+        bgtime = center_time-time_range/2
+        edtime = center_time+time_range/2
         ind = (self.taxis>=bgtime)&(self.taxis<=edtime)
         return np.nanmean(self.data[:,ind],axis=1)
 
-    def get_time_average_value(self,center_depth,depth_range):
+    def get_depth_average_value(self,center_depth,depth_range):
         bgdist = center_depth-depth_range/2
         eddist = center_depth+depth_range/2
         ind = (self.daxis>=bgdist)&(self.daxis<=eddist)
