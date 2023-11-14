@@ -5,6 +5,7 @@ import ipywidgets as widgets
 from IPython.display import display
 import matplotlib.dates as mdates
 from dateutil.parser import parse
+import matplotlib.ticker as ticker
 
 class CoPlot_Simple:
     def __init__(self,fig,Ddata,Pdata,
@@ -152,9 +153,6 @@ def multi_plot_legend(lns,loc='best'):
     plt.gca().legend(lns,labs,loc=loc)
 
 
-import matplotlib.ticker as ticker
-
-
 class PrecisionDateFormatter(ticker.Formatter):
     """
     Extend the `matplotlib.ticker.Formatter` class to allow for millisecond
@@ -197,3 +195,59 @@ def plot_interactive(x,y):
     df['y'] = y
     fig = px.line(data_frame=df,x='x',y='y')
     fig.show()
+
+
+class TDSlice:
+
+    def __init__(self, fig, data):
+        self.data = data
+        self.pick_t = np.median(data.taxis)
+        self.pick_d = np.median(data.daxis)
+        self.fig = fig
+        self.ax1 = plt.subplot2grid((6, 6), (0, 0), rowspan=4, colspan=4)
+        self.ax2 = plt.subplot2grid((6, 6), (4, 0), rowspan=2, colspan=4, sharex=self.ax1)
+        self.ax3 = plt.subplot2grid((6, 6), (0, 4), rowspan=4, colspan=2, sharey=self.ax1)
+        self.trc_lim = np.array([-1,1])*4
+        self.hline = None
+        self.vline = None
+
+        # Connect 's' key press event to the update function
+        self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
+
+    def draw(self, **kwargs):
+        plt.sca(self.ax1)
+        self.data.plot_waterfall(**kwargs)
+        self.update_trace_plots()
+
+    def update_trace_plots(self):
+        if self.vline:
+            self.vline.remove()
+        if self.hline:
+            self.hline.remove()
+
+        md, trc = self.data.get_value_by_depth(self.pick_d)
+        self.ax2.clear()
+        self.ax2.plot(self.data.taxis, trc)
+        self.vline = self.ax1.axvline(self.pick_t, color='k', linestyle='--')
+        self.ax2.set_ylim(self.trc_lim)
+
+        t, trc = self.data.get_value_by_time(self.pick_t)
+        self.ax3.clear()
+        self.ax3.plot(trc, self.data.daxis)
+        self.ax3.set_xlim(self.trc_lim)
+        self.hline = self.ax1.axhline(self.pick_d, color='k', linestyle='--')
+
+        self.fig.canvas.draw()
+
+    def on_key_press(self, event):
+        if event.key == 'a':
+            if event.inaxes == self.ax1:
+                if event.xdata is not None and event.ydata is not None:
+                    self.pick_t = event.xdata
+                    self.pick_d = event.ydata
+                    self.update_trace_plots()
+
+# Usage example:
+# tdslice = TDSlice(plt.figure(), your_data_object)
+# tdslice.draw()
+# plt.show()

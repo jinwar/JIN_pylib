@@ -349,6 +349,12 @@ class Data2D():
         ind = np.argmin(np.abs(self.mds-depth))
         md = self.mds[ind]
         return md,self.data[ind,:]
+    
+    def get_value_by_time(self,t):
+        ind = np.argmin(np.abs(self.taxis-t))
+        actual_t = self.taxis[ind]
+        return actual_t,self.data[:,ind]
+
 
     def get_value_by_timestr(self,timestr,fmt=None):
         if fmt is None:
