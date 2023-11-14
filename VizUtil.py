@@ -247,6 +247,13 @@ class TDSlice:
                     self.pick_d = event.ydata
                     self.update_trace_plots()
 
+        if event.key == '=':
+            self.trc_lim = self.trc_lim*1.2
+            self.update_trace_plots()
+
+        if event.key == '-':
+            self.trc_lim = self.trc_lim/1.2
+            self.update_trace_plots()
 # Usage example:
 # tdslice = TDSlice(plt.figure(), your_data_object)
 # tdslice.draw()
