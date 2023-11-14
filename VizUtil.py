@@ -210,6 +210,12 @@ class TDSlice:
         self.trc_lim = np.array([-1,1])*4
         self.hline = None
         self.vline = None
+        self.xlim = None
+        self.ylim = None
+        self.ori_xlim = None
+        self.ori_ylim = None
+        self.pending_zoom_x = False
+        self.pending_zoom_y = False
 
         # Connect 's' key press event to the update function
         self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
@@ -218,6 +224,11 @@ class TDSlice:
         plt.sca(self.ax1)
         self.data.plot_waterfall(**kwargs)
         self.update_trace_plots()
+        if self.xlim is None:
+            self.xlim = self.ax1.axis()[:2]
+            self.ylim = self.ax1.axis()[2:]
+            self.ori_xlim = self.xlim
+            self.ori_ylim = self.ylim
 
     def update_trace_plots(self):
         if self.vline:
@@ -238,12 +249,29 @@ class TDSlice:
         self.hline = self.ax1.axhline(self.pick_d, color='k', linestyle='--')
 
         self.fig.canvas.draw()
+    
+    def update_zoom(self):
+        self.ax1.set_xlim(self.xlim)
+        self.ax1.set_ylim(self.ylim)
+        self.fig.canvas.draw()
+    
+    def _clear_pending(self):
+        self.pending_zoom_x = False
+        self.pending_zoom_y = False
 
     def on_key_press(self, event):
         if event.key == 'a':
             if event.inaxes == self.ax1:
                 if event.xdata is not None and event.ydata is not None:
                     self.pick_t = event.xdata
+                    self.pick_d = event.ydata
+                    self.update_trace_plots()
+            if event.inaxes == self.ax2:
+                if event.xdata is not None and event.ydata is not None:
+                    self.pick_t = event.xdata
+                    self.update_trace_plots()
+            if event.inaxes == self.ax3:
+                if event.xdata is not None and event.ydata is not None:
                     self.pick_d = event.ydata
                     self.update_trace_plots()
 
@@ -254,6 +282,27 @@ class TDSlice:
         if event.key == '-':
             self.trc_lim = self.trc_lim/1.2
             self.update_trace_plots()
+
+        if event.key == 'o':
+            self.xlim = self.ori_xlim
+            self.ylim = self.ori_ylim
+            self.update_zoom()
+        
+        if event.key == 'y':
+            if (event.inaxes == self.ax1) or (event.inaxes == self.ax3):
+                if self.pending_zoom_y:
+                    y1 = self.pending_value
+                    y2 = event.ydata
+                    y1,y2 = np.sort([y1,y2])
+                    self.ylim = [y2,y1]
+                    self.update_zoom()
+
+                else:
+                    self.pending_zoom_y = True
+                    self.pending_value = event.ydata
+                    return
+        
+        self._clear_pending()
 # Usage example:
 # tdslice = TDSlice(plt.figure(), your_data_object)
 # tdslice.draw()
