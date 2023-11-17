@@ -35,15 +35,39 @@ class Data2D():
     def mds(self, mds):
         self.daxis = mds
     
-    def set_time_from_datetime(self,timestamps):
+    def set_time_from_datetime(self, timestamps):
+        """
+        Sets the start time and time axis for the data from a list of datetime objects.
+
+        Parameters:
+        timestamps (list): A list of datetime objects representing the timestamps of the data.
+
+        This function sets the start time as the first timestamp and calculates the time axis as the 
+        total seconds from the start time for each timestamp.
+
+        """
         self.start_time = timestamps[0]
         self.taxis = np.array([(t-timestamps[0]).total_seconds()
              for t in timestamps])
     
     def apply_timeshift(self,ts):
+        """
+        Applies a time shift to the start time of the data.
+
+        Parameters:
+        ts (int): The time shift in hours to be applied.
+
+        This function adds the time shift to the start time of the data.
+        """
         self.start_time += timedelta(hours=ts)
     
     def cal_timestamp_from_taxis(self):
+        """
+        Calculates the timestamps from the time axis.
+
+        This function calculates the timestamps by adding the time axis (in seconds) to the start time. 
+        The calculated timestamps are then stored in the timestamps attribute of the object.
+        """
         timestamps = [self.start_time + timedelta(seconds=t) 
             for t in self.taxis]
         self.timestamps = timestamps
@@ -62,10 +86,32 @@ class Data2D():
         return out_t
     
     def reset_starttime(self):
+        """
+        Resets the start time of the data.
+
+        This function adjusts the start time by adding the first value of the time axis (in seconds) 
+        to the current start time. It also adjusts the time axis by subtracting the first value from 
+        all its elements.
+        """
         self.start_time += timedelta(seconds=self.taxis[0])
         self.taxis -= self.taxis[0]
 
-    def select_time(self,bgtime,edtime,makecopy=False,reset_starttime=True):
+    def select_time(self, bgtime, edtime, makecopy=False, reset_starttime=True):
+        """
+        Selects a time range from the data.
+
+        Parameters:
+        bgtime (float, datetime, string): The beginning time of the selection in seconds.
+        edtime (float, datetime, string): The ending time of the selection in seconds.
+        makecopy (bool, optional): If True, a copy of the data is made before the selection. Default is False.
+        reset_starttime (bool, optional): If True, the start time is reset after the selection. Default is True.
+
+        This function selects a time range from the data based on the provided beginning and ending times. 
+        It checks the input times and selects the data within the time range. If makecopy is True, a copy 
+        of the data is made before the selection. If reset_starttime is True, the start time is reset after 
+        the selection by adding the first value of the new time axis and subtracting it from all its elements. 
+        The data is then updated or a new data object is returned depending on the makecopy parameter.
+        """
         bgt = self._check_inputtime(bgtime,self.taxis[0])
         edt = self._check_inputtime(edtime,self.taxis[-1])
         
