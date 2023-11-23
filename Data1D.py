@@ -9,14 +9,23 @@ from dateutil.parser import parse
 
 class PumpCurve(BasicClass):
 
-    def __init__(self):
+    def __init__(self,df=None):
         self.version = '1.0'
         self.taxis = []
-        self.df = []
+        self.df = df
         self.plot_cols = []
+        self.ylims = None
     
     def set_df(self,df):
         self.df = df
+    
+    def set_ylims(self,ylims):
+        self.ylims = ylims
+    
+    def list_columns(self,is_print=True):
+        if is_print:
+            print(self.df.columns)
+        return self.df.columns
     
     def set_plot_columns(self,cols):
         self.plot_cols = cols
@@ -65,8 +74,15 @@ class PumpCurve(BasicClass):
         for i in range(3):
             axs[i].tick_params(axis='y', colors=lines[i].get_color())
         for i in range(3):
-            ylim = axs[i].axis()[2:4]
-            axs[i].set_ylim(ylim[0],ylim[1]*1.2)
+            # ylim = axs[i].axis()[2:4]
+            if self.ylims is None:
+                values = self.df[cols[i]].values
+                top = np.nanpercentile(values, 95)
+                edge = top*0.2
+                ylim = [0-edge,top+edge]
+            else:
+                ylim = [0,self.ylims[i]]
+            axs[i].set_ylim(ylim[0],ylim[1])
         if use_timestamp:
             plt.gca().xaxis_date()
             date_format = PrecisionDateFormatter(timefmt

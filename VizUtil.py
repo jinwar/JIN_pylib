@@ -30,6 +30,9 @@ class CoPlot_Simple:
         axs[1] = plt.subplot2grid((5,10),(3,0),rowspan=1,sharex = axs[0],colspan=9)
         self.Pdata.plot_multi_cols(use_timestamp=True,**curve_plot_args)
         self.axs = axs
+        start_time = np.datetime64(self.Ddata.start_time)
+        end_time = start_time + np.timedelta64(int(self.Ddata.taxis[-1]),'s')
+        axs[1].set_xlim([start_time,end_time])
 
 class CoPlot_Waterfall_Pumping:
 
