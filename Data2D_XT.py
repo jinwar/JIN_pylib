@@ -61,6 +61,14 @@ class Data2D():
         """
         self.start_time += timedelta(hours=ts)
     
+    def print_info(self):
+        print(f'Start time: {self.start_time}')
+        print(f'taxis: {self.taxis[0]} - {self.taxis[-1]} seconds')
+        print(f'daxis: {self.daxis[0]} - {self.daxis[-1]}')
+        print(f'data dimension: {self.data.shape}')
+        print(f'taxis dimension: {self.taxis.shape}')
+        print(f'daxis dimension: {self.daxis.shape}')
+    
     def cal_timestamp_from_taxis(self):
         """
         Calculates the timestamps from the time axis.
