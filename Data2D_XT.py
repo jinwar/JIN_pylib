@@ -137,8 +137,8 @@ class Data2D():
             dists = self.chans
         else:
             dists = self.daxis
-        bgt = self._check_inputtime(bgdp,dists[0])
-        edt = self._check_inputtime(eddp,dists[-1])
+        bgdp = self._check_inputtime(bgdp,dists[0])
+        eddp = self._check_inputtime(eddp,dists[-1])
         
         ind = (dists>=bgdp)&(dists<=eddp)
         if makecopy:
