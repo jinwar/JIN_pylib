@@ -87,7 +87,7 @@ class Data2D():
         out_t = t
         if t is None:
             out_t = t0
-        if type(t) is datetime:
+        if isinstance(t, (datetime, pd.Timestamp)):
             out_t = (t-self.start_time).total_seconds()
         if isinstance(t,str):
             out_t = (parse(t)-self.start_time).total_seconds()
