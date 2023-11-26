@@ -9,7 +9,7 @@ import matplotlib.ticker as ticker
 
 class CoPlot_Simple:
     def __init__(self,fig,Ddata,Pdata,
-            c_center=0,c_range=1):
+            c_center=None,c_range=None):
         self.fig = fig
         self.Pdata = Pdata
         self.Ddata = Ddata
@@ -23,7 +23,14 @@ class CoPlot_Simple:
         axs = [None,None]
         axs[0] = plt.subplot2grid((5,10),(0,0),rowspan=3,colspan=9)
         self.Ddata.plot_waterfall(use_timestamp=True,**waterfall_plot_args)
-        plt.clim(cx*self.c_range+self.c_center)
+        if self.c_center is not None:
+            plt.clim(cx*self.c_range+self.c_center)
+        if self.c_center is None and self.c_range is not None:
+            if isinstance(self.c_range, (list, np.ndarray)):
+                print('hello')
+                plt.clim(self.c_range)
+            else:
+                plt.clim(cx*self.c_range)
         plt.setp(axs[0].get_xticklabels(), visible=False)
         cbaxes = self.fig.add_axes([0.85, 0.45, 0.02, 0.4])
         plt.colorbar(cax=cbaxes)
