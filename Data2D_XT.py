@@ -227,28 +227,28 @@ class Data2D():
         self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('hp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
-def bp_filter(self, lowf, highf, order=2, axis=1, edge_taper=0.1):
-    """
-    Apply a bandpass filter to the data.
+    def bp_filter(self, lowf, highf, order=2, axis=1, edge_taper=0.1):
+        """
+        Apply a bandpass filter to the data.
 
-    Parameters:
-    lowf (float): The lower frequency limit of the bandpass filter.
-    highf (float): The upper frequency limit of the bandpass filter.
-    order (int, optional): The order of the filter. Default is 2.
-    axis (int, optional): The axis along which to apply the filter. Default is 1.
-    edge_taper (float, optional): The proportion of the data to taper at the edges. Default is 0.1.
+        Parameters:
+        lowf (float): The lower frequency limit of the bandpass filter.
+        highf (float): The upper frequency limit of the bandpass filter.
+        order (int, optional): The order of the filter. Default is 2.
+        axis (int, optional): The axis along which to apply the filter. Default is 1.
+        edge_taper (float, optional): The proportion of the data to taper at the edges. Default is 0.1.
 
-    Returns:
-    None. The data is modified in-place.
-    """
-    if axis == 1:
-        dt = np.median(np.diff(self.taxis))
-    if axis == 0:
-        dt = np.median(np.diff(self.mds))
-    self.data *= tukey(self.data.shape[1], edge_taper).reshape((1, -1))
-    self.data = gjsignal.bpfilter(self.data, dt, lowf, highf, order=order, axis=axis)
-    self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
-            .format(lowf, highf, order, axis))
+        Returns:
+        None. The data is modified in-place.
+        """
+        if axis == 1:
+            dt = np.median(np.diff(self.taxis))
+        if axis == 0:
+            dt = np.median(np.diff(self.mds))
+        self.data *= tukey(self.data.shape[1], edge_taper).reshape((1, -1))
+        self.data = gjsignal.bpfilter(self.data, dt, lowf, highf, order=order, axis=axis)
+        self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
+                .format(lowf, highf, order, axis))
     
     def down_sample(self,ds_R):
         dt = np.median(np.diff(self.taxis))
