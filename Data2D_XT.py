@@ -209,11 +209,13 @@ class Data2D():
             print('cannot find chans field')
             pass
     
-    def lp_filter(self,corner_freq,order=2,axis=1):
+    def lp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.1):
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
+            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
+            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
         self.data = gjsignal.lpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('lp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
@@ -221,9 +223,10 @@ class Data2D():
     def hp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.1):
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
+            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
-        self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
+            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
         self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('hp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
@@ -243,8 +246,10 @@ class Data2D():
         """
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
+            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
+            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
         self.data *= tukey(self.data.shape[1], edge_taper).reshape((1, -1))
         self.data = gjsignal.bpfilter(self.data, dt, lowf, highf, order=order, axis=axis)
         self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
