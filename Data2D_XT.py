@@ -421,11 +421,16 @@ class Data2D():
         md = self.mds[ind]
         return md,self.data[ind,:]
     
+    def get_spectrum_by_depth(self,depth):
+        md,trace = self.get_value_by_depth(depth)
+        dt = np.median(np.diff(self.taxis))
+        f,spe = gjsignal.amp_spectrum(trace,dt)
+        return f, spe
+    
     def get_value_by_time(self,t):
         ind = np.argmin(np.abs(self.taxis-t))
         actual_t = self.taxis[ind]
         return actual_t,self.data[:,ind]
-
 
     def get_value_by_timestr(self,timestr,fmt=None):
         if fmt is None:
