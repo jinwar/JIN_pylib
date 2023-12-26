@@ -30,17 +30,25 @@ def Data2D_plotfk(DASdata):
     plt.ylabel('Wave number')
 
 def Data2D_fkfilter_applymask(DASdata,mask):
+    if not hasattr(DASdata,'fftdata'):
+        DASdata = Data2D_fft2(DASdata)
     DASdata.fftdata *= mask
     DASdata.data = np.real(np.fft.ifft2(np.fft.ifftshift(DASdata.fftdata)))
     DASdata.history.append('applied custom fk filter')
     return DASdata
 
-def Data2D_fkfilter_maskgen(DASdata,vmin,vmax,filter_std):
-    mask = np.ones(DASdata.fftdata.shape)
+def Data2D_fkfilter_maskgen(DASdata,vmin,vmax,filter_std,accept=False):
+    if not hasattr(DASdata,'fftdata'):
+        DASdata = Data2D_fft2(DASdata)
     fi,ki = np.meshgrid(DASdata.faxis,DASdata.kaxis)
     v_mat = fi/ki
     ind = (v_mat>vmin)&(v_mat<vmax)
-    mask[ind] = 0
+    if accept:
+        mask = np.zeros(DASdata.fftdata.shape)
+        mask[ind] = 1
+    else:
+        mask = np.ones(DASdata.fftdata.shape)
+        mask[ind] = 0
     # smooth the boundary
     mask = gaussian_filter(mask,filter_std)
     return mask
