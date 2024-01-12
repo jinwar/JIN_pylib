@@ -337,7 +337,7 @@ class Data2D():
             ,timescale=timescale,use_timestamp=use_timestamp)
         plotdata = self.data[::downsample[0],::downsample[1]]
         if islog:
-            plotdata = 10*np.log10(plotdata)
+            plotdata = 10*np.log10(plotdata.copy())
         plt.imshow(plotdata ,cmap = cmap, aspect='auto',extent=extent)
         if use_timestamp:
             plt.gca().xaxis_date()
