@@ -35,6 +35,16 @@ class Data2D():
     def mds(self, mds):
         self.daxis = mds
     
+    def get_datetime64(self):
+        timestamps = []
+        for t in self.taxis:
+            timestamps.append(np.datetime64(self.start_time + timedelta(seconds=t)))
+        return np.array(timestamps)
+    
+    def get_mdates_taxis(self):
+        timestamps = [self.start_time + timedelta(seconds=t) for t in self.taxis]
+        return mdates.date2num(timestamps)
+    
     def set_time_from_datetime(self, timestamps):
         """
         Sets the start time and time axis for the data from a list of datetime objects.
