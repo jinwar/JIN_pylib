@@ -226,6 +226,8 @@ class TDSlice:
         self.ori_ylim = None
         self.pending_zoom_x = False
         self.pending_zoom_y = False
+        self.ax3_update = True
+        self.ax2_update = True
 
         # Connect 's' key press event to the update function
         self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
@@ -246,16 +248,19 @@ class TDSlice:
         if self.hline:
             self.hline.remove()
 
-        md, trc = self.data.get_value_by_depth(self.pick_d)
-        self.ax2.clear()
-        self.ax2.plot(self.data.taxis, trc)
-        self.vline = self.ax1.axvline(self.pick_t, color='k', linestyle='--')
-        self.ax2.set_ylim(self.trc_lim)
+        if self.ax2_update:
+            md, trc = self.data.get_value_by_depth(self.pick_d)
+            self.ax2.clear()
+            self.ax2.plot(self.data.taxis, trc)
+            self.ax2.set_ylim(self.trc_lim)
 
-        t, trc = self.data.get_value_by_time(self.pick_t)
-        self.ax3.clear()
-        self.ax3.plot(trc, self.data.daxis)
-        self.ax3.set_xlim(self.trc_lim)
+        if self.ax3_update:
+            t, trc = self.data.get_value_by_time(self.pick_t)
+            self.ax3.clear()
+            self.ax3.plot(trc, self.data.daxis)
+            self.ax3.set_xlim(self.trc_lim)
+
+        self.vline = self.ax1.axvline(self.pick_t, color='k', linestyle='--')
         self.hline = self.ax1.axhline(self.pick_d, color='k', linestyle='--')
 
         self.fig.canvas.draw()
