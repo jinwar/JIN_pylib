@@ -339,6 +339,7 @@ class Data2D():
             ,timefmt_ms_precision = 1
             ,scale = None
             ,islog = False
+            ,interpolation='antialiased'
             ):
         '''
         timescale options: 'second','hour','day'
@@ -348,7 +349,9 @@ class Data2D():
         plotdata = self.data[::downsample[0],::downsample[1]]
         if islog:
             plotdata = 10*np.log10(plotdata.copy())
-        plt.imshow(plotdata ,cmap = cmap, aspect='auto',extent=extent)
+
+        plt.imshow(plotdata ,cmap = cmap, aspect='auto',extent=extent,interpolation=interpolation)
+
         if use_timestamp:
             plt.gca().xaxis_date()
             date_format = PrecisionDateFormatter(timefmt
@@ -390,7 +393,7 @@ class Data2D():
         plt.gca().invert_yaxis()
 
     
-    def fill_gap_zeros(self,fill_value=0,dt=None):
+    def fill_gap_zeros(self,fill_value=0,dt=None, is_average = False):
         """
         Filling data gap with zeros or with a fixed value
         """
@@ -400,9 +403,16 @@ class Data2D():
         new_taxis = np.linspace(np.min(self.taxis),np.max(self.taxis)+dt,N)
         new_data = np.zeros((self.data.shape[0],N))
         new_data[:,:] = fill_value
-        for i in range(self.data.shape[1]):
-            ind = int(np.round(self.taxis[i]/dt))
-            new_data[:,ind] = self.data[:,i]
+        if is_average:
+            for i in range(N):
+                ind = np.abs(self.taxis-new_taxis[i])<dt/2
+                if np.sum(ind)==0:
+                    continue
+                new_data[:,i] = np.mean(self.data[:,ind],axis=1)
+        else:
+            for i in range(self.data.shape[1]):
+                ind = int(np.round(self.taxis[i]/dt))
+                new_data[:,ind] = self.data[:,i]
         self.data = new_data
         self.taxis = new_taxis
         self.history.append(f'fill_gap_zeros(fill_value={fill_value},dt={dt})')
