@@ -81,7 +81,10 @@ class PumpCurve(BasicClass):
                 edge = top*0.2
                 ylim = [0-edge,top+edge]
             else:
-                ylim = [0,self.ylims[i]]
+                if isinstance(self.ylims[i],(list,np.ndarray)):
+                    ylim = self.ylims[i]
+                else:
+                    ylim = [0,self.ylims[i]]
             axs[i].set_ylim(ylim[0],ylim[1])
         if use_timestamp:
             plt.gca().xaxis_date()
