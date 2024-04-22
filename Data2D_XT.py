@@ -265,12 +265,22 @@ class Data2D():
         self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
                 .format(lowf, highf, order, axis))
     
+    def take_gradient(self,axis=1):
+        data = np.gradient(self.data,axis=axis)
+        if axis == 1:
+            data /= np.median(np.diff(self.taxis))
+        if axis == 0:
+            data /= np.median(np.diff(self.mds))
+        self.data = data
+        self.history.append('take_gradient(axis={})'.format(axis))
+    
     def down_sample(self,ds_R):
         dt = np.median(np.diff(self.taxis))
         self.lp_filter(1/dt/2/ds_R*0.8)
         self.data = self.data[:,::ds_R]
         self.taxis = self.taxis[::ds_R]
         self.history.append('down_sample({})'.format(ds_R))
+
 
     def take_time_diff(self):
         data = np.diff(self.data,axis=1)
