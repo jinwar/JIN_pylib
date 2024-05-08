@@ -5,7 +5,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime,timedelta
-from scipy.signal import medfilt2d,tukey
+from scipy.signal import medfilt2d
+try:
+    from scipy.signal import tukey
+except:
+    pass
+try:
+    from scipy.signal.windows import tukey
+except:
+    pass
 import matplotlib.dates as mdates
 from dateutil.parser import parse
 from copy import copy
