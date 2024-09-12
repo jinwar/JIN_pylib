@@ -7,7 +7,6 @@ from tqdm import tqdm
 from . import Data2D_XT
 from dateutil import parser 
 
-
 class DataFolder:
 
     def __init__(self, folder_path, file_extension='h5', verbose=False):
@@ -45,11 +44,19 @@ class DataFolder:
         
         ind = np.where((timestamps>=start_time) & (timestamps<=end_time))[0]
         datalist = []
-        for filename in tqdm(files[ind]):
-            data, timestamps = read_h5(filename)
+        for iter in tqdm(ind):
+            filename = files[iter]
+            timestamp_from_file = timestamps[iter]
+            data, timestamps_from_h5 = read_h5(filename)
             DASdata = Data2D_XT.Data2D()
             DASdata.data = data
-            DASdata.set_time_from_datetime(timestamps)
+            # modify the time stamp from h5 file using the time stamp from the file name
+            # because the time stamp from h5 filename is not accurate, need to replace the microsecond part.
+            timestamp_from_file = timestamp_from_file.replace(microsecond=timestamps_from_h5[0].microsecond)
+            # Time calibration value. Add this value to the time stamp from h5 file
+            time_delta = timestamp_from_file - timestamps_from_h5[0]
+            timestamps_from_h5 = [ts + time_delta for ts in timestamps_from_h5]
+            DASdata.set_time_from_datetime(timestamps_from_h5)
             DASdata.chans = np.arange(data.shape[0])
             datalist.append(DASdata)
         merge_data = Data2D_XT.merge_data2D(datalist)
