@@ -1,13 +1,14 @@
 
-from obspy import read, Trace, Stream, UTCDateTime
-from obspy.core import AttribDict
-from obspy.io.segy.segy import SEGYTraceHeader, SEGYBinaryFileHeader
-from obspy.io.segy.core import _read_segy
 import sys
 import numpy as np
 from . import gjsignal
+import h5py
 
 def savesegy(DASdata,filename):
+    from obspy import read, Trace, Stream, UTCDateTime
+    from obspy.core import AttribDict
+    from obspy.io.segy.segy import SEGYTraceHeader, SEGYBinaryFileHeader
+    from obspy.io.segy.core import _read_segy
     stream = Stream()
     for i in range(DASdata.data.shape[0]):
         data = DASdata.data[i,:]
@@ -55,3 +56,25 @@ def savesegy(DASdata,filename):
     print(stream)
     stream.write(filename, format='SEGY', data_encoding=1,
             byteorder=sys.byteorder)
+
+
+def print_hdf5_structure(file_name):
+    """
+    Prints the structure of an HDF5 file, including attributes and dataset dimensions.
+
+    Parameters:
+    file_name (str): The name of the HDF5 file to be inspected.
+
+    This function opens the specified HDF5 file in read mode and prints the structure of the file.
+    It prints the name and attributes of each object in the file, and if the object is a dataset,
+    it also prints its dimensions.
+    """
+    with h5py.File(file_name, 'r') as f:
+        def print_attrs(name, obj):
+            print(name)
+            for key, val in obj.attrs.items():
+                print(f"    {key}: {val}")
+            if isinstance(obj, h5py.Dataset):
+                print(f"    Dimensions: {obj.shape}")
+
+        f.visititems(print_attrs)
