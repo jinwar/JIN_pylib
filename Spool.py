@@ -4,10 +4,13 @@ from collections import OrderedDict
 from datetime import timedelta
 from glob import glob
 import os
+import re
 import sys
 import numpy as np
+from tqdm import tqdm
 from .Data2D_XT import merge_data2D
 import pickle
+from copy import deepcopy
 
 
 class spool:
@@ -89,6 +92,18 @@ class spool:
             & (len(self._cashe)>1):
             self._cashe.popitem(last=False)
         return True
+    
+    def select_time(self, bgtime, edtime):
+        """
+        select data in the time range
+        """
+        ind = np.where((self._df.start_time<edtime)
+                 &(self._df.end_time>bgtime))[0]
+        output = deepcopy(self)
+        output.set_database(self._df.iloc[ind])
+        output._df.iloc[0, output._df.columns.get_loc('start_time')] = bgtime
+        output._df.iloc[-1, output._df.columns.get_loc('end_time')] = edtime
+        return output
     
     def _get_data_nopl(self,bgtime,edtime):
         """
@@ -235,7 +250,7 @@ def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_proc
 
     sp_output = []
     sp_size = 0
-    for bgt, edt in sp.get_chunks(patch_size, overlap):
+    for bgt, edt in tqdm(sp.get_chunks(patch_size, overlap)):
         if sp._check_data(bgt, edt):
             data = sp.get_data(bgt, edt)
             if pre_process is not None:
@@ -267,7 +282,7 @@ def _output_spool(sp_output, output_path):
 
 def _get_filename(patch, time_string_length=19):
     bgstr = str(patch.start_time)[:time_string_length]
-    edstr = str(patch.start_time + timedelta(seconds = patch.taxis[-1])])[:time_string_length]
+    edstr = str(patch.start_time + timedelta(seconds = patch.taxis[-1]))[:time_string_length]
     filename = bgstr+'_to_'+edstr+'.h5'
     filename = _clean_filename(filename)
     return filename
