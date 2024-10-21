@@ -221,7 +221,7 @@ class spool:
 
 def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_process=None,
                patch_size=1, overlap=0, save_file_size=200, 
-               overwrite=True, **kargs):
+               overwrite=False, **kargs):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
