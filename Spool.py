@@ -7,7 +7,7 @@ import os
 import re
 import sys
 import numpy as np
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 from .Data2D_XT import merge_data2D
 import pickle
 from copy import deepcopy
