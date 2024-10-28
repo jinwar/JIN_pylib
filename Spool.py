@@ -295,3 +295,14 @@ def _clean_filename(filename):
     cleaned_filename = cleaned_filename.strip('. ').replace(' ', '_')
     
     return cleaned_filename
+
+
+def std(DASdata, down_size=60):
+    output_data = DASdata.copy()
+    data = []
+    N = len(DASdata.taxis)//down_size
+    for i in range(down_size):
+        data.append(np.std(DASdata.data[:,i*N:(i+1)*N], axis=1))
+    output_data.data = np.array(data).T
+    output_data.taxis = np.array([DASdata.taxis[i*N+N//2] for i in range(down_size)])
+    return output_data
