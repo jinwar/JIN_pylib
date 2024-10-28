@@ -270,3 +270,32 @@ def datetime_interp(timex,timex0,y0):
     
 def running_average(data,N):
     return np.convolve(data,np.ones((N,))/N,mode='same')
+
+
+def find_lpf_edge_effect(corf, dt, threshold=1e-6):
+    """
+    def find_lpf_edge_effect(corf, dt, threshold=1e-6):
+    Calculate the edge effect of a low-pass filter.
+    This function generates a test signal, applies a low-pass filter to it, 
+    and determines the time difference between the center of the test signal 
+    and the first point where the filtered signal exceeds a given threshold.
+    Parameters:
+    corf (float): The cutoff frequency of the low-pass filter.
+    dt (float): The time step of the signal.
+    threshold (float, optional): The threshold value to determine the edge effect. Default is 1e-6.
+    Returns:
+    float: The time difference between the center of the test signal and the first point 
+           where the filtered signal exceeds the threshold.
+    """
+
+    N = int(1/corf/dt*20)
+    test_data = np.zeros(N)
+    test_data[N//2] = 1
+    taxis = np.arange(N)*dt
+
+    test_data = lpfilter(test_data, dt, corf)
+
+    # find the first point with value larger than threshold
+    idx = np.where(np.abs(test_data)>threshold)[0][0]
+
+    return taxis[N//2]-taxis[idx]

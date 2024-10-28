@@ -227,7 +227,7 @@ class Data2D():
             print('cannot find chans field')
             pass
     
-    def lp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.1):
+    def lp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.0):
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
             self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
@@ -283,6 +283,21 @@ class Data2D():
         self.history.append('take_gradient(axis={})'.format(axis))
     
     def down_sample(self,ds_R):
+        """
+        Downsamples the data by a given reduction factor.
+
+        Parameters:
+        ds_R (int): The reduction factor by which to downsample the data.
+
+        This method performs the following steps:
+        1. Calculates the median time difference (dt) from the time axis.
+        2. Applies a low-pass filter to the data with a cutoff frequency based on the downsampling rate.
+        3. Downsamples the data and the time axis by the given reduction factor.
+        4. Appends the downsampling operation to the history.
+
+        Note:
+        - The low-pass filter is applied to prevent aliasing during the downsampling process.
+        """
         dt = np.median(np.diff(self.taxis))
         self.lp_filter(1/dt/2/ds_R*0.8)
         self.data = self.data[:,::ds_R]
@@ -413,7 +428,29 @@ class Data2D():
     
     def fill_gap_zeros(self,fill_value=0,dt=None, is_average = False):
         """
-        Filling data gap with zeros or with a fixed value
+        def fill_gap_zeros(self, fill_value=0, dt=None, is_average=False):
+            Fills gaps in the data with zeros or a specified fixed value.
+
+            Parameters:
+            -----------
+            fill_value : int or float, optional
+                The value to fill the gaps with. Default is 0.
+            dt : float, optional
+                The time interval to use for filling gaps. If None, the median of the differences
+                in the time axis (self.taxis) is used. Default is None.
+            is_average : bool, optional
+                If True, the gaps are filled with the average of the surrounding data points.
+                If False, the gaps are filled with the specified fill_value. Default is False.
+
+            Returns:
+            --------
+            None
+                The method updates the object's data and time axis in place.
+
+            Notes:
+            ------
+            - The method modifies the object's `data` and `taxis` attributes.
+            - The method appends a description of the operation to the object's `history` attribute.
         """
         if dt is None:
             dt = np.median(np.diff(self.taxis))
@@ -436,6 +473,19 @@ class Data2D():
         self.history.append(f'fill_gap_zeros(fill_value={fill_value},dt={dt})')
 
     def fill_gap_interp(self,dt=None):
+        """
+        def fill_gap_interp(self, dt=None):
+            Interpolates to fill gaps in the time axis and updates the data accordingly.
+
+            Parameters:
+            dt (float, optional): The desired time interval for interpolation. If not provided, 
+                                  the median of the differences in the existing time axis is used.
+
+            Updates:
+            self.data (numpy.ndarray): The data array with gaps filled by interpolation.
+            self.taxis (numpy.ndarray): The time axis with gaps filled by interpolation.
+            self.history (list): Appends a string indicating that fill_gap_interp was called with the specified dt.
+        """
         if dt is None:
             dt = np.median(np.diff(self.taxis))
         N = int(np.round((np.max(self.taxis)-np.min(self.taxis))/dt))+1
@@ -446,6 +496,29 @@ class Data2D():
         self.data = new_data
         self.taxis = new_taxis
         self.history.append(f'fill_gap_interp(dt={dt})')
+    
+    def remove_duplicate_time(self, re_interpolate = True):
+        """
+        def remove_duplicate_time(self, re_interpolate=True):
+            Remove duplicate time points from the time axis and corresponding data.
+
+            This method identifies and removes duplicate entries in the time axis (`taxis`).
+            The corresponding data points in `data` are also removed to maintain alignment.
+            Optionally, it can re-interpolate the data to remove abnormal close time points.
+
+            Args:
+                re_interpolate (bool): If True, re-interpolates the data to fill gaps created by the removal of duplicates. Default is True.
+                !! need to make sure that the overlap section is less than 50% 
+
+            Returns:
+                None
+        """
+        _, idx = np.unique(self.taxis, return_index=True)
+        self.taxis = self.taxis[idx]
+        self.data = self.data[:, idx]
+        if re_interpolate:
+            self.fill_gap_zeros()
+        self.history.append('remove_duplicate_time()')
 
     def interp_time(self,new_taxis):
         new_data = np.zeros((self.data.shape[0],len(new_taxis)))
