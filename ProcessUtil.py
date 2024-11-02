@@ -226,4 +226,6 @@ def spectrum_transform_2D(DASdata):
     spe_data.taxis = f
     spe_data.data = data
     spe_data.daxis = DASdata.daxis
+    spe_data.history = DASdata.history.copy()
+    spe_data.history.append('2D spectrum transform')
     return spe_data

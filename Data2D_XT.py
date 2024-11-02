@@ -86,6 +86,7 @@ class Data2D():
         print(f'data dimension: {self.data.shape}')
         print(f'taxis dimension: {self.taxis.shape}')
         print(f'daxis dimension: {self.daxis.shape}')
+        print(f'history: {self.history}')
     
     def cal_timestamp_from_taxis(self):
         """
@@ -230,25 +231,31 @@ class Data2D():
     def lp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.0):
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
-            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
-            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
+        self.edge_taper(edge_taper=edge_taper,axis=axis)
         self.data = gjsignal.lpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('lp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
 
-    def hp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.1):
+    def hp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.0):
+        self.edge_taper(edge_taper=edge_taper,axis=axis)
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
-            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
-            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
         self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('hp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
-    def bp_filter(self, lowf, highf, order=2, axis=1, edge_taper=0.1):
+    
+    def edge_taper(self,edge_taper=0.1,axis=1):
+        if axis == 1:
+            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
+        if axis == 0:
+            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
+        self.history.append('edge_taper(axis={})'.format(axis))
+
+    def bp_filter(self, lowf, highf, order=2, axis=1, edge_taper=0.0):
         """
         Apply a bandpass filter to the data.
 
@@ -264,11 +271,9 @@ class Data2D():
         """
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
-            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
         if axis == 0:
             dt = np.median(np.diff(self.mds))
-            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
-        self.data *= tukey(self.data.shape[1], edge_taper).reshape((1, -1))
+        self.edge_taper(edge_taper=edge_taper, axis=axis)
         self.data = gjsignal.bpfilter(self.data, dt, lowf, highf, order=order, axis=axis)
         self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
                 .format(lowf, highf, order, axis))
