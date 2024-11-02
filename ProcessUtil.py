@@ -229,3 +229,12 @@ def spectrum_transform_2D(DASdata):
     spe_data.history = DASdata.history.copy()
     spe_data.history.append('2D spectrum transform')
     return spe_data
+
+def tranform_STALTA(DASdata, STA, LTA):
+    out = DASdata.copy()
+    dt = np.median(np.diff(DASdata.taxis))
+    data = DASdata.data
+    for i in range(data.shape[0]):
+        out.data[i,:] = gjsignal.sta_lta_1d(data[i,:],dt,STA,LTA)
+    out.history.append(f'STA: {STA}, LTA: {LTA}')
+    return out

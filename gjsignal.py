@@ -299,3 +299,71 @@ def find_lpf_edge_effect(corf, dt, threshold=1e-6):
     idx = np.where(np.abs(test_data)>threshold)[0][0]
 
     return taxis[N//2]-taxis[idx]
+
+
+def sta_lta_1d(timeseries, dt, LTA, STA):
+    """
+    Implement STA/LTA method for earthquake detection using RMS and convolution.
+
+    Parameters:
+    timeseries (numpy array): 1D array of time series data
+    dt (float): Time sample interval in seconds
+    LTA (float): Length of Long-Term Average window in seconds
+    STA (float): Length of Short-Term Average window in seconds
+
+    Returns:
+    numpy array: 1D array of STA/LTA ratio
+    """
+    # Convert LTA and STA from seconds to number of samples
+    LTA_samples = int(LTA / dt)
+    STA_samples = int(STA / dt)
+
+    # Calculate the squared values of the timeseries for RMS calculation
+    squared_timeseries = timeseries ** 2
+
+    # Define windows for STA and LTA
+    STA_window = np.ones(STA_samples) / STA_samples
+    LTA_window = np.ones(LTA_samples) / LTA_samples
+
+    # Compute RMS for STA and LTA using convolution
+    sta_rms = np.sqrt(np.convolve(squared_timeseries, STA_window, mode='same'))
+    lta_rms = np.sqrt(np.convolve(squared_timeseries, LTA_window, mode='same'))
+
+    # Shift STA ahead of LTA by LTA_samples to ensure STA window is ahead
+    lta_rms_shifted = np.roll(lta_rms, int((LTA_samples + STA_samples) / 2))
+
+    # Avoid division by zero and calculate STA/LTA ratio
+
+    sta_lta_ratio = sta_rms/lta_rms_shifted
+    sta_lta_ratio[:LTA_samples+STA_samples//2] = 0  # Set initial values to zero to avoid edge effects
+    sta_lta_ratio[-STA_samples//2:] = 0  # Set final values to zero to avoid edge effects
+    
+    return sta_lta_ratio
+
+def sta_lta_2d(timeseries, dt, LTA, STA):
+    """
+    Implement STA/LTA method for earthquake detection using RMS and convolution.
+
+    Parameters:
+    timeseries (numpy array): 2D array of time series data (channels x samples)
+    dt (float): Time sample interval in seconds
+    LTA (float): Length of Long-Term Average window in seconds
+    STA (float): Length of Short-Term Average window in seconds
+
+    Returns:
+    numpy array: 1D array of averaged STA/LTA ratio across all channels
+    """
+    # Convert LTA and STA from seconds to number of samples
+    LTA_samples = int(LTA / dt)
+    STA_samples = int(STA / dt)
+
+    # Initialize an array to store the STA/LTA ratios for each channel
+    sta_lta_ratios = np.zeros(timeseries.shape)
+
+    for i in range(timeseries.shape[0]):
+        sta_lta_ratios[i] = sta_lta_1d(timeseries[i], dt, LTA, STA)
+
+    # Average the STA/LTA ratios across all channels
+    averaged_sta_lta_ratio = np.mean(sta_lta_ratios, axis=0)
+
+    return averaged_sta_lta_ratio

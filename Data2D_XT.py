@@ -53,6 +53,14 @@ class Data2D():
         timestamps = [self.start_time + timedelta(seconds=t) for t in self.taxis]
         return mdates.date2num(timestamps)
     
+    def get_stalta(self,sta,lta):
+        dt = np.median(np.diff(self.taxis))
+        stalta_ratio = gjsignal.sta_lta_2d(self.data,dt,sta,lta)
+        ind = (self.taxis>sta/2+lta)&(self.taxis<self.taxis[-1]-sta/2)
+        timestamps = self.get_datetime64()[ind]
+        stalta_ratio = stalta_ratio[ind]
+        return timestamps,stalta_ratio
+    
     def set_time_from_datetime(self, timestamps):
         """
         Sets the start time and time axis for the data from a list of datetime objects.
@@ -157,6 +165,7 @@ class Data2D():
                 self.start_time += timedelta(seconds=self.taxis[0])
                 self.taxis -= self.taxis[0]
             self.data = self.data[:,ind]
+            return self
 
     def select_depth(self,bgdp,eddp,makecopy=False,ischan=False):
         
@@ -191,6 +200,7 @@ class Data2D():
                 self.chans =self.chans[ind]
             except: 
                 pass
+            return self
     
     def copy(self):
         return copy.deepcopy(self)
