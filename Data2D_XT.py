@@ -57,8 +57,8 @@ class Data2D():
         dt = np.median(np.diff(self.taxis))
         stalta_ratio = gjsignal.sta_lta_2d(self.data,dt,sta,lta)
         ind = (self.taxis>sta/2+lta)&(self.taxis<self.taxis[-1]-sta/2)
-        timestamps = self.get_datetime64()[ind]
-        stalta_ratio = stalta_ratio[ind]
+        timestamps = self.get_datetime64()
+        stalta_ratio = stalta_ratio
         return timestamps,stalta_ratio
     
     def set_time_from_datetime(self, timestamps):
@@ -72,6 +72,9 @@ class Data2D():
         total seconds from the start time for each timestamp.
 
         """
+            # Check if timestamps are in np.datetime64 format and convert them to datetime
+        if isinstance(timestamps[0], np.datetime64):
+            timestamps = [pd.to_datetime(t).to_pydatetime() for t in timestamps]
         self.start_time = timestamps[0]
         self.taxis = np.array([(t-timestamps[0]).total_seconds()
              for t in timestamps])
@@ -512,7 +515,7 @@ class Data2D():
         self.taxis = new_taxis
         self.history.append(f'fill_gap_interp(dt={dt})')
     
-    def remove_duplicate_time(self, re_interpolate = True):
+    def remove_duplicate_time(self, tol=1e-2, re_interpolate = False):
         """
         def remove_duplicate_time(self, re_interpolate=True):
             Remove duplicate time points from the time axis and corresponding data.
@@ -528,7 +531,13 @@ class Data2D():
             Returns:
                 None
         """
-        _, idx = np.unique(self.taxis, return_index=True)
+        # sort the time axis
+        ind = np.argsort(self.taxis)
+        self.taxis = self.taxis[ind]
+        self.data = self.data[:,ind]
+
+        dt = np.median(np.diff(self.taxis))
+        idx = np.where(np.diff(self.taxis)>dt*tol)[0]
         self.taxis = self.taxis[idx]
         self.data = self.data[:, idx]
         if re_interpolate:

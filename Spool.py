@@ -11,6 +11,7 @@ from tqdm.notebook import tqdm
 from .Data2D_XT import merge_data2D
 import pickle
 from copy import deepcopy
+import pandas as pd
 
 
 class spool:
@@ -232,6 +233,19 @@ class spool:
         sp_df = self._df()
         sp_length = (sp_df['end_time'].max()-sp_df['start_time'].min()).total_seconds()
         return sp_length
+    
+    def __add__(self,sp2):
+        """
+        Concatenate two spool objects
+        """
+        if self._df is None:
+            return sp2
+        if sp2._df is None:
+            return self
+        df = pd.concat([self._df,sp2._df],ignore_index=True)
+        sp = deepcopy(self)
+        sp.set_database(df)
+        return sp
 
 
 def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_process=None,

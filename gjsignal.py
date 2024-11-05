@@ -301,15 +301,16 @@ def find_lpf_edge_effect(corf, dt, threshold=1e-6):
     return taxis[N//2]-taxis[idx]
 
 
-def sta_lta_1d(timeseries, dt, LTA, STA):
+def sta_lta_1d(timeseries, dt, STA, LTA):
     """
     Implement STA/LTA method for earthquake detection using RMS and convolution.
+    def sta_lta_1d(timeseries, dt, STA, LTA):
 
     Parameters:
     timeseries (numpy array): 1D array of time series data
     dt (float): Time sample interval in seconds
-    LTA (float): Length of Long-Term Average window in seconds
     STA (float): Length of Short-Term Average window in seconds
+    LTA (float): Length of Long-Term Average window in seconds
 
     Returns:
     numpy array: 1D array of STA/LTA ratio
@@ -340,28 +341,25 @@ def sta_lta_1d(timeseries, dt, LTA, STA):
     
     return sta_lta_ratio
 
-def sta_lta_2d(timeseries, dt, LTA, STA):
+def sta_lta_2d(timeseries, dt, STA, LTA):
     """
     Implement STA/LTA method for earthquake detection using RMS and convolution.
+    def sta_lta_2d(timeseries, dt, STA, LTA):
 
     Parameters:
     timeseries (numpy array): 2D array of time series data (channels x samples)
     dt (float): Time sample interval in seconds
-    LTA (float): Length of Long-Term Average window in seconds
     STA (float): Length of Short-Term Average window in seconds
+    LTA (float): Length of Long-Term Average window in seconds
 
     Returns:
     numpy array: 1D array of averaged STA/LTA ratio across all channels
     """
-    # Convert LTA and STA from seconds to number of samples
-    LTA_samples = int(LTA / dt)
-    STA_samples = int(STA / dt)
-
     # Initialize an array to store the STA/LTA ratios for each channel
     sta_lta_ratios = np.zeros(timeseries.shape)
 
     for i in range(timeseries.shape[0]):
-        sta_lta_ratios[i] = sta_lta_1d(timeseries[i], dt, LTA, STA)
+        sta_lta_ratios[i] = sta_lta_1d(timeseries[i], dt, STA, LTA)
 
     # Average the STA/LTA ratios across all channels
     averaged_sta_lta_ratio = np.mean(sta_lta_ratios, axis=0)
