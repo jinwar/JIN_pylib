@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage import gaussian_filter
 from scipy.interpolate import interpn,interp1d
+from datetime import timedelta
 
 from . import gjsignal, Data2D_XT
 
@@ -238,3 +239,13 @@ def tranform_STALTA(DASdata, STA, LTA):
         out.data[i,:] = gjsignal.sta_lta_1d(data[i,:],dt,STA,LTA)
     out.history.append(f'STA: {STA}, LTA: {LTA}')
     return out
+
+def select_stalta_triggers(stadata, threshold, gap=1):
+    ind = np.where(stadata.data[0]> threshold)[0]
+    dt = np.median(np.diff(stadata.taxis))
+    gap = int(gap/dt)
+    if len(ind) == 0:
+        return []
+    filtered_ind = ind[np.insert(np.diff(ind) > gap, 0, True)]
+    timestamps = [stadata.start_time + timedelta(seconds=stadata.taxis[i]) for i in filtered_ind]
+    return timestamps

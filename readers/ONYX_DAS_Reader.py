@@ -1,5 +1,5 @@
 from dateutil import parser
-from datetime import timedelta
+from datetime import timedelta, timezone
 
 from .. import Data2D_XT,Spool
 import numpy as np
@@ -8,6 +8,9 @@ import h5py
 from glob import glob
 from tqdm import tqdm
 from datetime import datetime
+
+def timestamt2datetime(ts):
+    return datetime.fromtimestamp(ts/1.0e6, tz=timezone.utc).replace(tzinfo=None)
 
 def get_time_range(filename):
     with h5py.File(filename,'r') as f:
@@ -18,9 +21,9 @@ def get_time_range(filename):
         # timestr = f['Acquisition/Raw[0]/RawData'].attrs['PartEndTime']
         # end_time = parser.parse(timestr).replace(tzinfo=None)
         ts = f['Acquisition/Raw[0]/RawDataTime'][0]
-        start_time = datetime.fromtimestamp(ts/1.0e6)
+        start_time = timestamt2datetime(ts)
         ts = f['Acquisition/Raw[0]/RawDataTime'][-1]
-        end_time = datetime.fromtimestamp(ts/1.0e6)
+        end_time = timestamt2datetime(ts)
     return start_time, end_time
 
 def reader(filename, bgtime, edtime):
@@ -37,7 +40,7 @@ def reader(filename, bgtime, edtime):
         # bgt = (bgtime - start_time).total_seconds()
         # edt = (edtime - start_time).total_seconds()
         timestamps = f['Acquisition/Raw[0]/RawDataTime'][:]
-        timestamps = np.array([datetime.fromtimestamp(ts/1.0e6) for ts in timestamps])
+        timestamps = np.array([timestamt2datetime(ts) for ts in timestamps])
 
         # get depth info
         Nx = f['Acquisition/Raw[0]/RawData'].shape[1]

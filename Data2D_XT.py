@@ -53,6 +53,10 @@ class Data2D():
         timestamps = [self.start_time + timedelta(seconds=t) for t in self.taxis]
         return mdates.date2num(timestamps)
     
+    def get_datetime(self):
+        timestamps = [self.start_time + timedelta(seconds=t) for t in self.taxis]
+        return timestamps
+    
     def get_stalta(self,sta,lta):
         dt = np.median(np.diff(self.taxis))
         stalta_ratio = gjsignal.sta_lta_2d(self.data,dt,sta,lta)
