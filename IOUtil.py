@@ -1,4 +1,5 @@
 
+from datetime import datetime, timezone
 import sys
 import numpy as np
 from . import gjsignal
@@ -78,3 +79,7 @@ def print_hdf5_structure(file_name):
                 print(f"    Dimensions: {obj.shape}")
 
         f.visititems(print_attrs)
+
+
+def timestamp2datetime(ts):
+    return datetime.fromtimestamp(ts/1.0e6, tz=timezone.utc).replace(tzinfo=None)
