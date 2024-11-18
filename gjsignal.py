@@ -381,3 +381,43 @@ def sta_lta_2d(timeseries, dt, STA, LTA):
     averaged_sta_lta_ratio = np.mean(sta_lta_ratios, axis=0)
 
     return averaged_sta_lta_ratio
+
+
+def interp_to_matrix(x0,x,kind='cubic'):
+    ''' Function convert interpolation from grid location x0 to data location x to an interpolation matrix
+    so that interp1d(x0,y0)(x) is equivalent to A.dot(y0)
+    FYI: this is a very slow algorithm for the coding easiness.
+    usage: A = interp_to_matrix(x0,x)
+    input:
+        x0: interpolation control point location, (n,) array
+        x: data point location, (m,) array
+    output:
+        matrix A with shape (m,n)
+    written by Ge Jin, gjin@mines.edu, 09/2019
+    '''
+    A = np.zeros((len(x),len(x0)))
+    for i in range(len(x0)):
+        y0 = np.zeros(len(x0))
+        y0[i] = 1
+        f = interp1d(x0,y0,kind=kind,bounds_error=False,fill_value='extrapolation')
+        A[:,i] = f(x)
+
+    return A
+
+def control_point_curvefit(xc, x0, y0, kind = 'cubic'):
+    ''' Function to fit a curve to the control points
+    usage: y = control_point_curvefit(xc, x0, y0, smooth=1e-4, kind = 'cubic')
+    input:
+        xc: location of control points
+        x0: location of data points
+        y0: data points
+        smooth: smoothing factor for the curve fitting
+        kind: kind of interpolation
+    output:
+        y: fitted curve
+    written by Ge Jin,
+    '''
+    A = interp_to_matrix(xc,x0,kind=kind)
+    yc = np.linalg.lstsq(A,y0)[0]
+    f = interp1d(xc,yc,kind=kind,bounds_error=False,fill_value=(yc[0],yc[-1]))
+    return f
