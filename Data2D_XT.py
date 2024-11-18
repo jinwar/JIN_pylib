@@ -556,6 +556,17 @@ class Data2D():
         self.taxis = new_taxis
     
     def get_value_by_depth(self,depth):
+        """
+        def get_value_by_depth(self, depth):
+            Get the data value at the specified depth.
+
+            Parameters:
+            depth (float): The depth value to query.
+
+            Returns:
+            md (float): The closest depth value found in the data.
+            data (numpy.ndarray): The data values at the specified depth.
+        """
         ind = np.argmin(np.abs(self.mds-depth))
         md = self.mds[ind]
         return md,self.data[ind,:]

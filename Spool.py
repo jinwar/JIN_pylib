@@ -12,6 +12,7 @@ from .Data2D_XT import merge_data2D
 import pickle
 from copy import deepcopy
 import pandas as pd
+from dateutil.parser import parse
 
 
 class spool:
@@ -47,6 +48,7 @@ class spool:
         self._partial_reading = support_partial_reading
         self._cashe_size_limit = 1.0 # in GB
         self._cashe = OrderedDict({})
+        self._debug = False
         pass
 
     def set_database(self,df):
@@ -94,16 +96,28 @@ class spool:
             self._cashe.popitem(last=False)
         return True
     
-    def select_time(self, bgtime, edtime):
+    def _check_inputtime(self,t,t0):
+        out_t = t
+        if t is None:
+            out_t = t0
+        if isinstance(t,str):
+            out_t = parse(t)
+        return out_t
+
+    def select_time(self, bgtime=None, edtime=None):
         """
         select data in the time range
         """
+        bgtime = self._check_inputtime(bgtime,self._df['start_time'].min())
+        edtime = self._check_inputtime(edtime,self._df['end_time'].max())
         ind = np.where((self._df.start_time<edtime)
                  &(self._df.end_time>bgtime))[0]
         output = deepcopy(self)
         output.set_database(self._df.iloc[ind])
-        output._df.iloc[0, output._df.columns.get_loc('start_time')] = bgtime
-        output._df.iloc[-1, output._df.columns.get_loc('end_time')] = edtime
+        if output._df['start_time'].iloc[0] < bgtime:
+            output._df.iloc[0, output._df.columns.get_loc('start_time')] = bgtime
+        if output._df['end_time'].iloc[-1] > edtime:
+            output._df.iloc[-1, output._df.columns.get_loc('end_time')] = edtime
         return output
     
     def _get_data_nopl(self,bgtime,edtime):
@@ -139,14 +153,20 @@ class spool:
         patch_list = []
         for i in ind:
             file = self._df['file'].iloc[i]
-            p = self._reader(file,bgtime,edtime)
-            patch_list.append(p)
+            try:
+                p = self._reader(file,bgtime,edtime)
+                patch_list.append(p)
+            except Exception as e:
+                print(f'Error in reading file: {file}')
+                print(f'Error: {e}')
 
         merged_data = merge_data2D(patch_list)
 
         return merged_data
 
-    def get_data(self,bgtime,edtime):
+    def get_data(self,bgtime=None,edtime=None):
+        bgtime = self._check_inputtime(bgtime,self._df['start_time'].min())
+        edtime = self._check_inputtime(edtime,self._df['end_time'].max())
         if self._partial_reading:
             return self._get_data_pl(bgtime,edtime)
         else:
@@ -164,7 +184,8 @@ class spool:
         dt = (df['start_time'].iloc[1:].values - df['end_time'].iloc[:-1].values)\
                 /np.timedelta64(1,'s')
 
-        max_dt = np.median(dt)*1.5
+        if max_dt is None:
+            max_dt = np.median(dt)*1.5
         ind = np.where(dt > max_dt)[0]
         ind = np.concatenate(([-1],ind,[len(df)-1]))
 
@@ -287,6 +308,11 @@ def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_proc
     print('processing succeeded')
     return True
 
+
+def load_pickle(filename):
+    sp = spool()
+    sp.load_pickle(filename)
+    return sp
 
 def _output_spool(sp_output, output_path):        
     patch_output = merge_data2D(sp_output)

@@ -200,6 +200,22 @@ def running_average(data, N):
         outdata[-i] = np.mean(data[-i - halfN:])
     return outdata
 
+def down_sample(data, ratio):
+    '''
+    Downsamples the input data by the given ratio after applying a low-pass filter.
+    def down_sample(data, ratio):
+
+    Parameters:
+    data (array-like): The input data to be downsampled.
+    ratio (int): The downsampling ratio. Must be a positive integer.
+
+    Returns:
+    array-like: The downsampled data.
+    '''
+    lpdata = lpfilter(data, 1, 1 / ratio / 2)
+    return lpdata[::ratio]
+
+
 
 def degC_to_degK(C):
     return C - 273.15
