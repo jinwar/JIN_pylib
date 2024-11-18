@@ -61,14 +61,14 @@ def savesegy(DASdata,filename):
 
 def print_hdf5_structure(file_name):
     """
-    Prints the structure of an HDF5 file, including attributes and dataset dimensions.
+    Prints the structure of an HDF5 file, including attributes, dataset dimensions, and dtype.
 
     Parameters:
     file_name (str): The name of the HDF5 file to be inspected.
 
     This function opens the specified HDF5 file in read mode and prints the structure of the file.
     It prints the name and attributes of each object in the file, and if the object is a dataset,
-    it also prints its dimensions.
+    it also prints its dimensions and dtype.
     """
     with h5py.File(file_name, 'r') as f:
         def print_attrs(name, obj):
@@ -77,6 +77,7 @@ def print_hdf5_structure(file_name):
                 print(f"    {key}: {val}")
             if isinstance(obj, h5py.Dataset):
                 print(f"    Dimensions: {obj.shape}")
+                print(f"    Dtype: {obj.dtype}")
 
         f.visititems(print_attrs)
 
