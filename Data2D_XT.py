@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+
+from tqdm import tqdm
 from . import gjsignal
 from .VizUtil import PrecisionDateFormatter
 import numpy as np
@@ -513,7 +515,8 @@ class Data2D():
         N = int(np.round((np.max(self.taxis)-np.min(self.taxis))/dt))+1
         new_taxis = np.linspace(np.min(self.taxis),np.max(self.taxis),N)
         new_data = np.zeros((self.data.shape[0],N))
-        for i in range(self.data.shape[0]):
+        print('Filling data gap by interpolation...')
+        for i in tqdm(range(self.data.shape[0])):
             new_data[i,:] = np.interp(new_taxis,self.taxis,self.data[i,:],left=0,right=0)
         self.data = new_data
         self.taxis = new_taxis
