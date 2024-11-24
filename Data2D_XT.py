@@ -101,6 +101,7 @@ class Data2D():
         print(f'taxis: {self.taxis[0]} - {self.taxis[-1]} seconds')
         print(f'daxis: {self.daxis[0]} - {self.daxis[-1]}')
         print(f'data dimension: {self.data.shape}')
+        print(f'data size: {int(self.data.size*4/1e6)} MB')
         print(f'taxis dimension: {self.taxis.shape}')
         print(f'daxis dimension: {self.daxis.shape}')
         print(f'history: {self.history}')
