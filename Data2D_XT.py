@@ -483,13 +483,13 @@ class Data2D():
         new_data = np.zeros((self.data.shape[0],N))
         new_data[:,:] = fill_value
         if is_average:
-            for i in range(N):
+            for i in tqdm(range(N)):
                 ind = np.abs(self.taxis-new_taxis[i])<dt/2
                 if np.sum(ind)==0:
                     continue
                 new_data[:,i] = np.mean(self.data[:,ind],axis=1)
         else:
-            for i in range(self.data.shape[1]):
+            for i in tqdm(range(self.data.shape[1])):
                 ind = int(np.round(self.taxis[i]/dt))
                 new_data[:,ind] = self.data[:,i]
         self.data = new_data
