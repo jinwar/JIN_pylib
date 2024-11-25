@@ -16,6 +16,9 @@ class PickFrac():
         self.lines = []
         self.cx = np.array([-1,1])
         self.plot_current_only = False
+
+        # Disable all keyboard shortcuts
+        self.fig.canvas.mpl_disconnect(self.fig.canvas.manager.key_press_handler_id)
     
     def set_init_c_range(self, crange):
         self.cx = np.array([-1,1])*crange
@@ -60,6 +63,9 @@ class PickFrac():
                 ind = np.argmin(np.abs(mds-event.ydata))
                 self.pickdf = self.pickdf.drop(ind)
                 self.pickdf.reset_index(drop=True,inplace=True)
+            self.update_lines()
+
+        if event.key == 'u':
             self.update_lines()
 
         if event.key == '=':

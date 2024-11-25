@@ -393,7 +393,7 @@ class Data2D():
             ,downsample=[1,1]
             ,xaxis_rotation=0
             ,xtickN = 4
-            ,timefmt = '%m/%d\n%H:%M:%S.{ms}' 
+            ,timefmt = '%y/%m/%d\n%H:%M:%S.{ms}' 
             ,timefmt_ms_precision = 1
             ,scale = None
             ,islog = False
