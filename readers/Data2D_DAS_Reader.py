@@ -23,4 +23,4 @@ def reader(filename):
     return DASdata
 
 def create_spool(datapath, search_pattern='*.h5'):
-    return create_spool_common(datapath,get_time_range,reader,search_pattern=search_pattern)
+    return create_spool_common(datapath,get_time_range,reader,search_pattern=search_pattern, support_partial_reading=False)
