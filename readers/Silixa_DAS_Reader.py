@@ -1,13 +1,11 @@
-from dateutil import parser
-from datetime import timedelta, timezone
 
-from .. import Data2D_XT,Spool
 import numpy as np
-import pandas as pd
 import h5py
 from glob import glob
-from tqdm import tqdm
-from datetime import datetime
+from datetime import datetime, timezone
+
+from .. import Data2D_XT
+from .reader_utils import create_spool_common
 
 def timestamt2datetime(ts):
     return datetime.fromtimestamp(ts/1.0e6, tz=timezone.utc).replace(tzinfo=None)
@@ -59,23 +57,5 @@ def reader(filename, bgtime, edtime):
     
     return DASdata
 
-def create_spool(datapath,extension = '.h5'):
-    files = glob(datapath+'/*'+extension)
-    bgtimes = []
-    edtimes = []
-    final_files = []
-    print('Indexing Files....')
-    for file in tqdm(files):
-        try:
-            bgt,edt = get_time_range(file)
-            bgtimes.append(bgt)
-            edtimes.append(edt)
-            final_files.append(file)
-        except:
-            print('Error reading file:',file)
-            continue
-    
-    df = pd.DataFrame({'file':final_files,'start_time':bgtimes,'end_time':edtimes})
-
-    sp = Spool.spool(df,reader, support_partial_reading=True)
-    return sp
+def create_spool(datapath, search_pattern='*.h5'):
+    return create_spool_common(datapath,get_time_range,reader,search_pattern=search_pattern)
