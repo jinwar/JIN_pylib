@@ -63,16 +63,19 @@ def create_spool(datapath,extension = '.h5'):
     files = glob(datapath+'/*'+extension)
     bgtimes = []
     edtimes = []
+    final_files = []
     print('Indexing Files....')
     for file in tqdm(files):
         try:
             bgt,edt = get_time_range(file)
             bgtimes.append(bgt)
             edtimes.append(edt)
+            final_files.append(file)
         except:
             print('Error reading file:',file)
+            continue
     
-    df = pd.DataFrame({'file':files,'start_time':bgtimes,'end_time':edtimes})
+    df = pd.DataFrame({'file':final_files,'start_time':bgtimes,'end_time':edtimes})
 
     sp = Spool.spool(df,reader, support_partial_reading=True)
     return sp
