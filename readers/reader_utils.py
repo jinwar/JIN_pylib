@@ -5,7 +5,7 @@ from .. import Spool
 import pandas as pd
 
 def create_spool_common(datapath,get_time_range, reader
-                        , search_pattern = '*.h5', support_partial_reading = False):
+                        , search_pattern = '*.h5', support_partial_reading = True):
     files = glob(datapath+'/'+search_pattern)
     bgtimes = []
     edtimes = []
