@@ -288,7 +288,7 @@ def running_average(data,N):
     return np.convolve(data,np.ones((N,))/N,mode='same')
 
 
-def find_lpf_edge_effect(corf, dt, threshold=1e-6):
+def find_lpf_edge_effect(corf, dt, threshold=1e-6, isfigure=False):
     """
     def find_lpf_edge_effect(corf, dt, threshold=1e-6):
     Calculate the edge effect of a low-pass filter.
@@ -308,11 +308,18 @@ def find_lpf_edge_effect(corf, dt, threshold=1e-6):
     test_data = np.zeros(N)
     test_data[N//2] = 1
     taxis = np.arange(N)*dt
+    ori_testdata = test_data.copy()
 
     test_data = lpfilter(test_data, dt, corf)
+    if isfigure:
+        plt.figure()
+        plt.plot(taxis,ori_testdata)
+        plt.plot(taxis,test_data)
+        plt.ylim(np.min(test_data)*5,np.max(test_data)*2)
+        plt.show()
 
     # find the first point with value larger than threshold
-    idx = np.where(np.abs(test_data)>threshold)[0][0]
+    idx = np.where(np.abs(test_data)>threshold*np.max(test_data))[0][0]
 
     return taxis[N//2]-taxis[idx]
 
