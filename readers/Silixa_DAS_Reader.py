@@ -47,6 +47,7 @@ def reader(filename, bgtime, edtime):
 
         # read data
         ind = (timestamps>=bgtime) & (timestamps<=edtime)
+        ind = np.where(ind)[0]
         data = f['Acquisition/Raw[0]/RawData'][ind,:]
         timestamps = timestamps[ind]
 

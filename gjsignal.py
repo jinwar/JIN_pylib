@@ -308,18 +308,19 @@ def find_lpf_edge_effect(corf, dt, threshold=1e-6, isfigure=False):
     test_data = np.zeros(N)
     test_data[N//2] = 1
     taxis = np.arange(N)*dt
+    taxis -= taxis[N//2]
     ori_testdata = test_data.copy()
 
     test_data = lpfilter(test_data, dt, corf)
-    if isfigure:
-        plt.figure()
-        plt.plot(taxis,ori_testdata)
-        plt.plot(taxis,test_data)
-        plt.ylim(np.min(test_data)*5,np.max(test_data)*2)
-        plt.show()
 
     # find the first point with value larger than threshold
     idx = np.where(np.abs(test_data)>threshold*np.max(test_data))[0][0]
+
+    if isfigure:
+        plt.plot(taxis,ori_testdata)
+        plt.plot(taxis,test_data)
+        plt.ylim(np.min(test_data)*5,np.max(test_data)*2)
+        plt.axvline(taxis[idx],color='r', linestyle='--')
 
     return taxis[N//2]-taxis[idx]
 

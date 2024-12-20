@@ -17,7 +17,6 @@ try:
 except:
     pass
 import matplotlib.dates as mdates
-from dateutil.parser import parse
 from copy import copy
 import h5py
 import copy
@@ -127,7 +126,7 @@ class Data2D():
         if isinstance(t, (datetime, pd.Timestamp)):
             out_t = (t-self.start_time).total_seconds()
         if isinstance(t,str):
-            out_t = (parse(t)-self.start_time).total_seconds()
+            out_t = (pd.to_datetime(t)-self.start_time).total_seconds()
         return out_t
     
     def reset_starttime(self):
@@ -160,7 +159,7 @@ class Data2D():
         bgt = self._check_inputtime(bgtime,self.taxis[0])
         edt = self._check_inputtime(edtime,self.taxis[-1])
         
-        ind = (self.taxis>=bgt)&(self.taxis<=edt)
+        ind = (self.taxis>=bgt)&(self.taxis<edt)
         if makecopy:
             out_data = copy.copy(self)
             out_data.taxis = self.taxis[ind]
@@ -249,6 +248,18 @@ class Data2D():
             pass
     
     def lp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.0):
+        """
+        Apply a low-pass filter to the data.
+
+        Parameters:
+        corner_freq (float): The cutoff frequency of the low-pass filter.
+        order (int, optional): The order of the filter. Default is 2.
+        axis (int, optional): The axis along which to apply the filter. Default is 1.
+        edge_taper (float, optional): The seconds of the data to taper at the edges. Default is 0.0.
+
+        Returns:
+        self
+        """
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
         if axis == 0:
@@ -257,8 +268,21 @@ class Data2D():
         self.data = gjsignal.lpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('lp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
+        return self
 
     def hp_filter(self,corner_freq,order=2,axis=1,edge_taper=0.0):
+        """
+        Apply a high-pass filter to the data.
+
+        Parameters:
+        corner_freq (float): The cutoff frequency of the high-pass filter.
+        order (int, optional): The order of the filter. Default is 2.
+        axis (int, optional): The axis along which to apply the filter. Default is 1.
+        edge_taper (float, optional): The seconds of the data to taper at the edges. Default is 0.0.
+
+        Returns:
+        Self. The data is modified in-place.
+        """
         self.edge_taper(edge_taper=edge_taper,axis=axis)
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
@@ -267,12 +291,19 @@ class Data2D():
         self.data = gjsignal.hpfilter(self.data,dt,corner_freq,order=order,axis=axis)
         self.history.append('hp_filter(corner_freq={},order={},axis={})'
                 .format(corner_freq,order,axis))
+        return self
     
-    def edge_taper(self,edge_taper=0.1,axis=1):
+    def edge_taper(self,edge_taper=0,axis=1):
         if axis == 1:
-            self.data *= tukey(self.data.shape[1],edge_taper).reshape((1,-1))
+            dt = np.median(np.diff(self.taxis))
+            edge_N = edge_taper/dt
+            edge_taper_ratio = edge_N/self.data.shape[1]
+            self.data *= tukey(self.data.shape[1],edge_taper_ratio*2).reshape((1,-1))
         if axis == 0:
-            self.data *= tukey(self.data.shape[0],edge_taper).reshape((-1,1))
+            dt = np.median(np.diff(self.daxis))
+            edge_N = edge_taper/dt
+            edge_taper_ratio = edge_N/self.data.shape[0]
+            self.data *= tukey(self.data.shape[0],edge_taper_ratio*2).reshape((-1,1))
         self.history.append('edge_taper(axis={})'.format(axis))
 
     def bp_filter(self, lowf, highf, order=2, axis=1, edge_taper=0.0):
@@ -284,10 +315,10 @@ class Data2D():
         highf (float): The upper frequency limit of the bandpass filter.
         order (int, optional): The order of the filter. Default is 2.
         axis (int, optional): The axis along which to apply the filter. Default is 1.
-        edge_taper (float, optional): The proportion of the data to taper at the edges. Default is 0.1.
+        edge_taper (float, optional): The seconds of the data to taper at the edges. Default is 0.0.
 
         Returns:
-        None. The data is modified in-place.
+        self. The data is modified in-place.
         """
         if axis == 1:
             dt = np.median(np.diff(self.taxis))
@@ -297,6 +328,7 @@ class Data2D():
         self.data = gjsignal.bpfilter(self.data, dt, lowf, highf, order=order, axis=axis)
         self.history.append('bp_filter(lowf={},highf={},order={},axis={})'
                 .format(lowf, highf, order, axis))
+        return self
     
     def take_gradient(self,axis=1):
         data = np.gradient(self.data,axis=axis)
@@ -307,12 +339,14 @@ class Data2D():
         self.data = data
         self.history.append('take_gradient(axis={})'.format(axis))
     
-    def down_sample(self,ds_R):
+    def down_sample(self,ds_R, **kwargs):
         """
         Downsamples the data by a given reduction factor.
 
         Parameters:
-        ds_R (int): The reduction factor by which to downsample the data.
+        ds_R (int, edge_taper = 0): The reduction factor by which to downsample the data.
+
+        edge_taper (float, optional): The seconds of the data to taper at the edges. Default is 0.0.
 
         This method performs the following steps:
         1. Calculates the median time difference (dt) from the time axis.
@@ -324,10 +358,10 @@ class Data2D():
         - The low-pass filter is applied to prevent aliasing during the downsampling process.
         """
         dt = np.median(np.diff(self.taxis))
-        self.lp_filter(1/dt/2/ds_R*0.8)
+        self.lp_filter(1/dt/2/ds_R*0.8, **kwargs)
         self.data = self.data[:,::ds_R]
         self.taxis = self.taxis[::ds_R]
-        self.history.append('down_sample({})'.format(ds_R))
+        self.history.append('down_sample({}, {})'.format(ds_R, kwargs))
 
 
     def take_time_diff(self):
@@ -588,7 +622,7 @@ class Data2D():
 
     def get_value_by_timestr(self,timestr,fmt=None):
         if fmt is None:
-            t = parse(timestr)
+            t = pd.to_datetime(timestr)
         else:
             t = datetime.strptime(timestr,fmt)
         dt = (t-self.start_time).total_seconds()

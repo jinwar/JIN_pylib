@@ -13,6 +13,7 @@ import pickle
 from copy import deepcopy
 import pandas as pd
 from dateutil.parser import parse
+from time import time
 
 
 class spool:
@@ -88,6 +89,8 @@ class spool:
         if filename in self._cashe.keys():
             self._cashe.move_to_end(filename)
             return False
+        if self._debug:
+            print(f'Loading file: {filename}')
         patch = self._reader(filename)
         self._cashe[filename] = patch
         # remove old data until cashe is smaller than limit
@@ -101,7 +104,8 @@ class spool:
         if t is None:
             out_t = t0
         if isinstance(t,str):
-            out_t = parse(t)
+            out_t = pd.to_datetime(t)
+        
         return out_t
 
     def select_time(self, bgtime=None, edtime=None):
@@ -154,6 +158,8 @@ class spool:
         for i in ind:
             file = self._df['file'].iloc[i]
             try:
+                if self._debug:
+                    print(f'Loading file: {file}')
                 p = self._reader(file,bgtime,edtime)
                 patch_list.append(p)
             except Exception as e:
@@ -167,6 +173,9 @@ class spool:
     def get_data(self,bgtime=None,edtime=None):
         bgtime = self._check_inputtime(bgtime,self._df['start_time'].min())
         edtime = self._check_inputtime(edtime,self._df['end_time'].max())
+        if self._debug:
+            print(f'Loading data from {bgtime} to {edtime}')
+            print(type(bgtime))
         if self._partial_reading:
             return self._get_data_pl(bgtime,edtime)
         else:
@@ -280,6 +289,8 @@ def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_proc
         for file in files:
             os.remove(file)
     
+    time_tracker = dict(dataio=0, pre_process=0, process=0, post_process=0, dataoutput=0)
+    
     time_segs = sp.get_time_segments()
     print('Found {} continuous datasets'.format(len(time_segs)))
 
@@ -287,18 +298,37 @@ def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_proc
     sp_size = 0
     for bgt, edt in tqdm(sp.get_chunks(patch_size, overlap)):
         if sp._check_data(bgt, edt):
-            data = sp.get_data(bgt, edt)
-            if pre_process is not None:
-                data = pre_process(data)
-            data = process_fun(data, **kargs)
-            if post_process is not None:
-                data = post_process(data)
-            sp_output.append(data)
-            sp_size += data.data.nbytes/1024**2
-            if sp_size > save_file_size:
-                _output_spool(sp_output,output_path)
-                sp_output = []
-                sp_size=0
+            try: 
+                tic = time()
+                data = sp.get_data(bgt, edt)
+                time_tracker['dataio'] += time() - tic
+
+                tic = time()
+                if pre_process is not None:
+                    data = pre_process(data)
+                time_tracker['pre_process'] += time() - tic
+
+                tic = time()
+                data = process_fun(data, **kargs)
+                time_tracker['process'] += time() - tic
+
+                tic = time()
+                if post_process is not None:
+                    data = post_process(data)
+                time_tracker['post_process'] += time() - tic
+
+                sp_output.append(data)
+                sp_size += data.data.nbytes/1024**2
+
+                tic = time()
+                if sp_size > save_file_size:
+                    _output_spool(sp_output,output_path)
+                    sp_output = []
+                    sp_size=0
+                time_tracker['dataoutput'] += time() - tic
+            except Exception as e:
+                print('Error in processing data: {} - {}'.format(bgt, edt))
+                print('Error: {}'.format(e))
         else:
             print('No data found in the time range: {} - {}'.format(bgt, edt))
 
@@ -306,6 +336,12 @@ def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_proc
         _output_spool(sp_output,output_path)
 
     print('processing succeeded')
+    print('Time spent on data io: {:.2f} s'.format(time_tracker['dataio']))
+    print('Time spent on pre-processing: {:.2f} s'.format(time_tracker['pre_process']))
+    print('Time spent on processing: {:.2f} s'.format(time_tracker['process']))
+    print('Time spent on post-processing: {:.2f} s'.format(time_tracker['post_process']))
+    print('Time spent on data output: {:.2f} s'.format(time_tracker['dataoutput']))
+
     return True
 
 
