@@ -249,3 +249,13 @@ def select_stalta_triggers(stadata, threshold, gap=1):
     filtered_ind = ind[np.insert(np.diff(ind) > gap, 0, True)]
     timestamps = [stadata.start_time + timedelta(seconds=stadata.taxis[i]) for i in filtered_ind]
     return timestamps
+
+def transform_histogram(DASdata, bins):
+    histograms = []
+    for i in range(0,DASdata.data.shape[0]):
+        hist, bins = np.histogram(DASdata.data[i,:], bins=bins)
+        histograms.append(hist)
+    output_data = DASdata.copy()
+    output_data.taxis = bins
+    output_data.data = np.array(histograms)
+    return output_data
