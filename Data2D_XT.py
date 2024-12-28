@@ -16,6 +16,7 @@ try:
     from scipy.signal.windows import tukey
 except:
     pass
+from scipy.interpolate import interp1d
 import matplotlib.dates as mdates
 from copy import copy
 import h5py
@@ -161,7 +162,7 @@ class Data2D():
         
         ind = (self.taxis>=bgt)&(self.taxis<edt)
         if makecopy:
-            out_data = copy.copy(self)
+            out_data = self.copy()
             out_data.taxis = self.taxis[ind]
             if reset_starttime:
                 out_data.start_time += timedelta(seconds=out_data.taxis[0])
@@ -187,7 +188,7 @@ class Data2D():
         
         ind = (dists>=bgdp)&(dists<=eddp)
         if makecopy:
-            out_data = copy.copy(self)
+            out_data = self.copy()
             out_data.data = out_data.data[ind,:]
             try:
                 out_data.daxis =out_data.daxis[ind]
@@ -707,7 +708,7 @@ class Data2D():
         self.taxis = np.arange(data.shape[1])*dt
         self.daxis = np.arange(data.shape[0])*dx
 
-def merge_data2D(data_list):
+def merge_data2D(data_list, daxis = None):
     data_list = np.array(data_list)
     bgtime_lst = np.array([d.start_time for d in data_list])
     ind = np.argsort(bgtime_lst)
@@ -721,7 +722,26 @@ def merge_data2D(data_list):
     taxis_list = [d.taxis + (d.start_time-bgtime).total_seconds() for d in data_list]
 
     merge_data = copy.deepcopy(data_list[0])
-    merge_data.data = np.concatenate([d.data.T for d in data_list]).T
+    if daxis is None:
+        merge_data.data = np.concatenate([d.data for d in data_list], axis=1)
+    elif isinstance(daxis, (np.ndarray, list)):
+        tmp = []
+        for d in data_list:
+            f = interp1d(d.daxis,d.data,axis=0, fill_value=np.nan, bounds_error=False)
+            tmp.append(f(daxis))
+        merge_data.data = np.concatenate(tmp,axis=1)
+        merge_data.daxis = daxis
+    elif isinstance(daxis, int):
+        daxis = data_list[daxis].daxis
+        tmp = []
+        for d in data_list:
+            f = interp1d(d.daxis,d.data,axis=0, fill_value=np.nan, bounds_error=False)
+            tmp.append(f(daxis))
+        merge_data.data = np.concatenate(tmp,axis=1)
+        merge_data.daxis = daxis
+    else:
+        raise ValueError('daxis should be either ndarray or list or int or None')
+
     merge_data.taxis = np.concatenate(taxis_list)
     return merge_data
 
