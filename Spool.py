@@ -345,6 +345,99 @@ def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_proc
     return True
 
 
+def sp_process_pipeline(sp : spool, output_path, process_fun, pre_process=None, post_process=None,
+               patch_size=1, overlap=0, save_file_size=200, 
+               overwrite=False):
+    
+    import concurrent.futures
+
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+    if overwrite:
+        files = glob(output_path+'/*.h5')
+        for file in files:
+            os.remove(file)
+    
+    time_tracker = dict(dataio=0, pre_process=0, process=0, post_process=0, dataoutput=0)
+    
+    time_segs = sp.get_time_segments()
+    print('Found {} continuous datasets'.format(len(time_segs)))
+
+    sp_output = []
+    sp_size = 0
+
+    def load_data(time_range):
+        bgt, edt = time_range
+        tic = time()
+        data = sp.get_data(bgt, edt)
+        time_tracker['dataio'] += time() - tic
+        return data
+    
+    def _process_data(data):
+        tic = time()
+        if pre_process is not None:
+            data = pre_process(data)
+        time_tracker['pre_process'] += time() - tic
+
+        tic = time()
+        data = process_fun(data)
+        time_tracker['process'] += time() - tic
+
+        tic = time()
+        if post_process is not None:
+            data = post_process(data)
+        time_tracker['post_process'] += time() - tic
+
+        return data
+    
+    time_chunks = sp.get_chunks(patch_size, overlap)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as io_executor, \
+        concurrent.futures.ThreadPoolExecutor() as process_executor:
+
+        future_load = io_executor.submit(load_data, time_chunks[0])
+        future_process = None
+
+        for bgt, edt in tqdm(time_chunks[1:]):
+            if sp._check_data(bgt, edt):
+                # try: 
+                data = future_load.result()
+
+                future_process = process_executor.submit(_process_data, data)
+                
+                future_load = io_executor.submit(load_data, (bgt, edt))
+
+                data = future_process.result()
+
+                sp_output.append(data)
+                sp_size += data.data.nbytes/1024**2
+
+                tic = time()
+                if sp_size > save_file_size:
+                    _output_spool(sp_output,output_path)
+                    sp_output = []
+                    sp_size=0
+                time_tracker['dataoutput'] += time() - tic
+                # except Exception as e:
+                #     print('Error in processing data: {} - {}'.format(bgt, edt))
+                #     print('Error: {}'.format(e))
+            else:
+                print('No data found in the time range: {} - {}'.format(bgt, edt))
+
+    if len(sp_output)>0:
+        _output_spool(sp_output,output_path)
+
+    print('processing succeeded')
+    print('Time spent on data io: {:.2f} s'.format(time_tracker['dataio']))
+    print('Time spent on pre-processing: {:.2f} s'.format(time_tracker['pre_process']))
+    print('Time spent on processing: {:.2f} s'.format(time_tracker['process']))
+    print('Time spent on post-processing: {:.2f} s'.format(time_tracker['post_process']))
+    print('Time spent on data output: {:.2f} s'.format(time_tracker['dataoutput']))
+
+    return True
+
+
 def load_pickle(filename):
     sp = spool()
     sp.load_pickle(filename)
