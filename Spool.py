@@ -430,6 +430,7 @@ def sp_process_pipeline(sp : spool, output_path, process_fun, pre_process=None, 
 
     print('processing succeeded')
     print('Time spent on data io: {:.2f} s'.format(time_tracker['dataio']))
+    print('Paralleized processing:')
     print('Time spent on pre-processing: {:.2f} s'.format(time_tracker['pre_process']))
     print('Time spent on processing: {:.2f} s'.format(time_tracker['process']))
     print('Time spent on post-processing: {:.2f} s'.format(time_tracker['post_process']))
