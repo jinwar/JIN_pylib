@@ -280,6 +280,18 @@ def multi_legend(lns,loc='best'):
 
 
 def datetime_interp(timex,timex0,y0):
+    """
+    def datetime_interp(timex,timex0,y0):
+        Interpolate data to a new time axis.
+        Parameters:
+        
+        timex (list): List of datetime objects for the new time axis.
+        timex0 (list): List of datetime objects for the original time axis.
+        y0 (list): List of data values corresponding to the original time axis.
+        
+        Returns:
+        list: List of data values interpolated to the new time axis.
+    """
     x = [(t-timex0[0]).total_seconds() for t in timex]
     x0 = [(t-timex0[0]).total_seconds() for t in timex0]
     return np.interp(x,x0,y0)
