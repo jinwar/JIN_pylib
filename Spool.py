@@ -139,7 +139,7 @@ class spool:
         for i in ind:
             self._load_to_cashe(i)
             p = self._cashe[self._df['file'].iloc[i]]
-            p.select_time(bgtime,edtime)
+            p = p.select_time(bgtime,edtime,makecopy=True)
             patch_list.append(p)
         
         merged_data = merge_data2D(patch_list)
