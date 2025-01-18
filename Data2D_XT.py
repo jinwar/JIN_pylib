@@ -99,6 +99,8 @@ class Data2D():
     def print_info(self):
         print(f'Start time: {self.start_time}')
         print(f'taxis: {self.taxis[0]} - {self.taxis[-1]} seconds')
+        dt = np.diff(self.taxis)
+        print(f'time interval: min: {np.min(dt)}, max: {np.max(dt)}, median: {np.median(dt)}')
         print(f'daxis: {self.daxis[0]} - {self.daxis[-1]}')
         print(f'data dimension: {self.data.shape}')
         print(f'data size: {int(self.data.size*4/1e6)} MB')
