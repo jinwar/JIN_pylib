@@ -416,7 +416,7 @@ def sp_process_pipeline(sp : spool, output_path, process_fun, pre_process=None, 
 
                 tic = time()
                 if sp_size > save_file_size:
-                    _output_spool(sp_output,output_path)
+                    _output_spool(sp_output,output_path, merge_daxis=sp._merge_daxis)
                     sp_output = []
                     sp_size=0
                 time_tracker['dataoutput'] += time() - tic
@@ -427,7 +427,7 @@ def sp_process_pipeline(sp : spool, output_path, process_fun, pre_process=None, 
                 print('No data found in the time range: {} - {}'.format(bgt, edt))
 
     if len(sp_output)>0:
-        _output_spool(sp_output,output_path)
+        _output_spool(sp_output,output_path, merge_daxis=sp._merge_daxis)
 
     print('processing succeeded')
     print('Time spent on data io: {:.2f} s'.format(time_tracker['dataio']))
@@ -445,8 +445,8 @@ def load_pickle(filename):
     sp.load_pickle(filename)
     return sp
 
-def _output_spool(sp_output, output_path):        
-    patch_output = merge_data2D(sp_output)
+def _output_spool(sp_output, output_path, merge_daxis = None):        
+    patch_output = merge_data2D(sp_output, daxis= merge_daxis)
     output_filename = os.path.join(output_path,_get_filename(patch_output))
     patch_output.saveh5(output_filename)
     return output_filename
