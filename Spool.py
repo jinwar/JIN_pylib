@@ -50,6 +50,7 @@ class spool:
         self._cashe_size_limit = 1.0 # in GB
         self._cashe = OrderedDict({})
         self._debug = False
+        self._merge_daxis = None
         pass
 
     def set_database(self,df):
@@ -142,7 +143,7 @@ class spool:
             p = p.select_time(bgtime,edtime,makecopy=True)
             patch_list.append(p)
         
-        merged_data = merge_data2D(patch_list)
+        merged_data = merge_data2D(patch_list,daxis = self._merge_daxis)
 
         return merged_data
     
@@ -166,7 +167,7 @@ class spool:
                 print(f'Error in reading file: {file}')
                 print(f'Error: {e}')
 
-        merged_data = merge_data2D(patch_list)
+        merged_data = merge_data2D(patch_list,daxis = self._merge_daxis)
 
         return merged_data
 
