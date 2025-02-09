@@ -234,7 +234,7 @@ class spool:
             temp = pickle.load(f)
         self.__dict__.update(temp.__dict__)
     
-    def get_chunks(self, length, overlap=0):
+    def get_chunks(self, length, overlap=0, is_partial=True):
         """
         Get a chunk of data with given length and overlap
         """
@@ -250,9 +250,10 @@ class spool:
         length = timedelta(seconds= length)
         overlap = timedelta(seconds= overlap)
         for bgtime, edtime in time_segs:
-            while bgtime < edtime:
+            while bgtime <= edtime:
                 if edtime - bgtime < length:
-                    chunk_list.append((bgtime,edtime))
+                    if is_partial:
+                        chunk_list.append((bgtime,edtime))
                     break
                 else:
                     chunk_list.append((bgtime,bgtime+length))
@@ -281,7 +282,7 @@ class spool:
 
 def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_process=None,
                patch_size=1, overlap=0, save_file_size=200, 
-               overwrite=False, **kargs):
+               overwrite=False, is_partial=True, **kargs):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
@@ -297,7 +298,7 @@ def sp_process(sp : spool, output_path, process_fun, pre_process=None, post_proc
 
     sp_output = []
     sp_size = 0
-    for bgt, edt in tqdm(sp.get_chunks(patch_size, overlap)):
+    for bgt, edt in tqdm(sp.get_chunks(patch_size, overlap, is_partial=is_partial)):
         if sp._check_data(bgt, edt):
             try: 
                 tic = time()
