@@ -67,6 +67,22 @@ class Data2D():
         stalta_ratio = stalta_ratio
         return timestamps,stalta_ratio
     
+    def get_chunk(self, length, overlap, is_partial=False):
+        bgtime = self.start_time + pd.to_timedelta(self.taxis[0], unit='s')
+        edtime = self.start_time + pd.to_timedelta(self.taxis[-1], unit='s')
+        length = timedelta(seconds= length)
+        overlap = timedelta(seconds= overlap)
+        chunk_list = []
+        while bgtime < edtime:
+            if edtime - bgtime < length:
+                if is_partial:
+                    chunk_list.append((bgtime,edtime))
+                break
+            else:
+                chunk_list.append((bgtime,bgtime+length))
+                bgtime += length - overlap
+        return chunk_list
+    
     def set_time_from_datetime(self, timestamps):
         """
         Sets the start time and time axis for the data from a list of datetime objects.
@@ -131,6 +147,11 @@ class Data2D():
         if isinstance(t,str):
             out_t = (pd.to_datetime(t)-self.start_time).total_seconds()
         return out_t
+
+    def __add__(self,other):
+        out_data = self.copy()
+        out_data.data += other.data
+        return out_data
     
     def reset_starttime(self):
         """
