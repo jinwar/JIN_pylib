@@ -217,12 +217,17 @@ def spectrum_analysis(DASdata,depth_range=None):
 
 def spectrum_transform_2D(DASdata):
     dt = np.median(np.diff(DASdata.taxis))
-    f,amp = gjsignal.amp_spectrum(DASdata.data[0,:],dt)
-    data = np.zeros((DASdata.data.shape[0],len(amp)))
-    for i in range(data.shape[0]):
-        f,amp = gjsignal.amp_spectrum(DASdata.data[i,:],dt)
-        data[i,:] = amp
     
+    # old code, less efficient
+    # f,amp = gjsignal.amp_spectrum(DASdata.data[0,:],dt)
+    # data = np.zeros((DASdata.data.shape[0],len(amp)))
+    # for i in range(data.shape[0]):
+    #     f,amp = gjsignal.amp_spectrum(DASdata.data[i,:],dt)
+    #     data[i,:] = amp
+
+    data = np.fft.rfft(DASdata.data,axis=1)
+    f = np.fft.rfftfreq(DASdata.data.shape[1],dt)
+
     spe_data = Data2D_XT.Data2D()
     spe_data.taxis = f
     spe_data.data = data
