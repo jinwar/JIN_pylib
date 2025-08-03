@@ -153,6 +153,21 @@ class Data2D():
         out_data.data += other.data
         return out_data
     
+    def __sub__(self,other):
+        out_data = self.copy()
+        out_data.data -= other.data
+        return out_data
+    
+    def __mul__(self,constant):
+        out_data = self.copy()
+        out_data.data *= constant
+        return out_data
+    
+    def __truediv__(self,constant):
+        out_data = self.copy()
+        out_data.data /= constant
+        return out_data
+
     def reset_starttime(self):
         """
         Resets the start time of the data.
