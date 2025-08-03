@@ -84,3 +84,4 @@ def get_FBA_from_files(files, freq_min, freq_max):
     FBAdata = Data2D_XT.merge_data2D(FBAs)
 
     return FBAdata
+
