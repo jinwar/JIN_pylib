@@ -54,7 +54,7 @@ def Data2D_fkfilter_maskgen(DASdata,vmin,vmax,filter_std,accept=False):
     mask = gaussian_filter(mask,filter_std)
     return mask
 
-def Data2D_fkfilter_velocity(DASdata,vmin,vmax,filter_std=0,direction=None):
+def Data2D_fkfilter_velocity(DASdata,vmin,vmax,filter_std=0,direction=None,accept=False):
     if not hasattr(DASdata,'fftdata'):
         DASdata = Data2D_fft2(DASdata)
     v_array = np.array([vmin,vmax])
@@ -62,7 +62,7 @@ def Data2D_fkfilter_velocity(DASdata,vmin,vmax,filter_std=0,direction=None):
         v_array = -np.abs(v_array)
     if direction=='down':
         v_array = np.abs(v_array)
-    mask = Data2D_fkfilter_maskgen(DASdata,min(v_array),max(v_array),filter_std)
+    mask = Data2D_fkfilter_maskgen(DASdata,min(v_array),max(v_array),filter_std,accept=accept)
     DASdata = Data2D_fkfilter_applymask(DASdata,mask)
     DASdata.history.pop()
     DASdata.history.append(
