@@ -1,4 +1,7 @@
 
+import copy
+import numpy as np
+from scipy.interpolate import interp1d
 from . import Data2D_XT
 from tqdm import tqdm
 
@@ -84,4 +87,46 @@ def get_FBA_from_files(files, freq_min, freq_max):
     FBAdata = Data2D_XT.merge_data2D(FBAs)
 
     return FBAdata
+
+def merge_data3D(data_list, daxis=None):
+    """
+    Merge a list of Data3D objects in time (data axis order is
+    time, channel, frequency), analogous to Data2D_XT.merge_data2D.
+    :param data_list: list of Data3D objects
+    :param daxis: None to require matching channel axes, an ndarray/list to
+        interpolate every patch onto a common channel axis, or an int index
+        into data_list (after time-sorting) to reuse that patch's channel axis
+    :return: merged Data3D object
+    """
+    data_list = np.array(data_list)
+    bgtime_lst = np.array([d.start_time for d in data_list])
+    ind = np.argsort(bgtime_lst)
+    data_list = data_list[ind]
+
+    bgtime = data_list[0].start_time
+    taxis_list = [d.taxis + (d.start_time-bgtime).total_seconds() for d in data_list]
+
+    merge_data = copy.deepcopy(data_list[0])
+    if daxis is None:
+        merge_data.data = np.concatenate([d.data for d in data_list], axis=0)
+    elif isinstance(daxis, (np.ndarray, list)):
+        tmp = []
+        for d in data_list:
+            f = interp1d(d.daxis,d.data,axis=1, fill_value=np.nan, bounds_error=False)
+            tmp.append(f(daxis))
+        merge_data.data = np.concatenate(tmp,axis=0)
+        merge_data.daxis = daxis
+    elif isinstance(daxis, int):
+        daxis = data_list[daxis].daxis
+        tmp = []
+        for d in data_list:
+            f = interp1d(d.daxis,d.data,axis=1, fill_value=np.nan, bounds_error=False)
+            tmp.append(f(daxis))
+        merge_data.data = np.concatenate(tmp,axis=0)
+        merge_data.daxis = daxis
+    else:
+        raise ValueError('daxis should be either ndarray or list or int or None')
+
+    merge_data.taxis = np.concatenate(taxis_list)
+    return merge_data
 
