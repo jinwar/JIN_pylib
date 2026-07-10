@@ -79,7 +79,7 @@ class spool:
     def _estimate_cashe_size(self):
         s = 0.0
         for p in self._cashe.values():
-            s += sys.getsizeof(p.data)
+            s += p.data.nbytes
         s = s/1024**3  # convert to GB
         return s
     
